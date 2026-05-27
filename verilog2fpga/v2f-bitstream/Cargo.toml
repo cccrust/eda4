@@ -1,0 +1,7 @@
+[package]
+name = "v2f-bitstream"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+v2f-db = { path = "../v2f-db" }

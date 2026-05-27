@@ -1,0 +1,3 @@
+[workspace]
+members = ["v2f-core", "v2f-cli", "v2f-db", "v2f-bitstream"]
+resolver = "2"

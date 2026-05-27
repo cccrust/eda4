@@ -1,0 +1,163 @@
+use verilog2rust::rhdl::prelude::*;
+
+#[derive(Debug, Clone)]
+pub struct Cpu {
+    pub clock: WireRef,
+    a: Vec<WireRef>,
+    i_r: Vec<WireRef>,
+    s_w: Vec<WireRef>,
+    p_c: Vec<WireRef>,
+    pc0: Vec<WireRef>,
+    m: Vec<Vec<WireRef>>,
+    t: Vec<WireRef>,
+}
+
+impl Cpu {
+    pub fn new(
+        clock: WireRef,
+    ) -> Self {
+        let a = bus("a", 16);
+        let i_r = bus("i_r", 16);
+        let s_w = bus("s_w", 16);
+        let p_c = bus("p_c", 16);
+        let pc0 = bus("pc0", 16);
+        let m = (0..33).map(|_| bus("m", 8)).collect::<Vec<Vec<WireRef>>>();
+        let t = bus("t", 16);
+        Cpu {
+            clock: clock.clone(),
+            a: a.clone(),
+            i_r: i_r.clone(),
+            s_w: s_w.clone(),
+            p_c: p_c.clone(),
+            pc0: pc0.clone(),
+            m: m.clone(),
+            t: t.clone(),
+        }
+    }
+
+    pub fn eval(&mut self) {
+    u16_to_bus(&self.i_r, ((((bus_to_u16(&self.m[((bus_to_u16(&self.p_c) as u64 + 1) & 65535u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(bus_to_u16(&self.p_c) as u64) as usize]) as u64) & 255u64) << 8) & 65535u64) as u16);
+    u16_to_bus(&self.pc0, (bus_to_u16(&self.p_c) as u64 & 65535u64) as u16);
+    u16_to_bus(&self.p_c, ((bus_to_u16(&self.p_c) as u64 + 2) & 65535u64 & 65535u64) as u16);
+    if if ((bus_to_u16(&self.i_r) as u64 >> 12) & 15u64) == (0u64) { 1 } else { 0 } != 0 {
+        u16_to_bus(&self.a, ((((bus_to_u16(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize]) as u64) & 255u64) << 8) & 65535u64) as u16);
+    } else {
+        if if ((bus_to_u16(&self.i_r) as u64 >> 12) & 15u64) == (3u64) { 1 } else { 0 } != 0 {
+            let __concat_val = bus_to_u16(&self.a) as u64;
+            for __j in 0..8 {
+                let __b = (__concat_val >> (0 + __j)) & 1;
+                set(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize][__j], if __b == 1 { Level::H } else { Level::L });
+            }
+            for __j in 0..8 {
+                let __b = (__concat_val >> (8 + __j)) & 1;
+                set(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize][__j], if __b == 1 { Level::H } else { Level::L });
+            }
+        } else {
+            if if ((bus_to_u16(&self.i_r) as u64 >> 12) & 15u64) == (4u64) { 1 } else { 0 } != 0 {
+                if get(&self.s_w[15]) != if (bus_to_u16(&self.a) as u64) < ((((bus_to_u16(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize]) as u64) & 255u64) << 8)) { Level::H } else { Level::L } { set(&self.s_w[15], if (bus_to_u16(&self.a) as u64) < ((((bus_to_u16(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize]) as u64) & 255u64) << 8)) { Level::H } else { Level::L }); }
+                if get(&self.s_w[14]) != if (bus_to_u16(&self.a) as u64) == ((((bus_to_u16(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize]) as u64) & 255u64) << 8)) { Level::H } else { Level::L } { set(&self.s_w[14], if (bus_to_u16(&self.a) as u64) == ((((bus_to_u16(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize]) as u64) & 255u64) << 8)) { Level::H } else { Level::L }); }
+            } else {
+                if if ((bus_to_u16(&self.i_r) as u64 >> 12) & 15u64) == (1u64) { 1 } else { 0 } != 0 {
+                    u16_to_bus(&self.a, ((bus_to_u16(&self.a) as u64 + (((bus_to_u16(&self.m[(((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 + 1) & 4095u64) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64) as usize]) as u64) & 255u64) << 8)) & 65535u64 & 65535u64) as u16);
+                } else {
+                    if if ((bus_to_u16(&self.i_r) as u64 >> 12) & 15u64) == (2u64) { 1 } else { 0 } != 0 {
+                        u16_to_bus(&self.p_c, ((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 & 65535u64) as u16);
+                    } else {
+                        if if ((bus_to_u16(&self.i_r) as u64 >> 12) & 15u64) == (5u64) { 1 } else { 0 } != 0 {
+                            if (bus_to_u16(&self.s_w) as u64 >> 14) & 1 != 0 {
+                                u16_to_bus(&self.p_c, ((bus_to_u16(&self.i_r) as u64 >> 0) & 4095u64 & 65535u64) as u16);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    println!("{}dns PC={:x} IR={:x}, SW={:x}, A={}", bus_to_u16(&self.t) as u64, bus_to_u16(&self.pc0) as u64, bus_to_u16(&self.i_r) as u64, bus_to_u16(&self.s_w) as u64, bus_to_u16(&self.a) as u64);
+    u16_to_bus(&self.t, ((bus_to_u16(&self.t) as u64 + 10) & 65535u64 & 65535u64) as u16);
+    }
+    pub fn run(&mut self) {
+        u16_to_bus(&self.p_c, (0 & 65535u64) as u16);
+        u16_to_bus(&self.s_w, (0 & 65535u64) as u16);
+        u16_to_bus(&self.t, (0 & 65535u64) as u16);
+        u16_to_bus(&mut self.m[(0) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(1) as usize], (22 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(2) as usize], (64 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(3) as usize], (26 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(4) as usize], (80 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(5) as usize], (18 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(6) as usize], (16 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(7) as usize], (24 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(8) as usize], (48 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(9) as usize], (22 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(10) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(11) as usize], (20 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(12) as usize], (16 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(13) as usize], (22 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(14) as usize], (48 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(15) as usize], (20 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(16) as usize], (32 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(17) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(18) as usize], (32 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(19) as usize], (18 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(20) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(21) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(22) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(23) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(24) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(25) as usize], (1 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(26) as usize], (0 & 255u64) as u16);
+        u16_to_bus(&mut self.m[(27) as usize], (10 & 255u64) as u16);
+        println!("Memory dump:");
+        println!("{}x: {}x", 0, (((bus_to_u16(&self.m[(1) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(0) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 2, (((bus_to_u16(&self.m[(3) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(2) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 4, (((bus_to_u16(&self.m[(5) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(4) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 6, (((bus_to_u16(&self.m[(7) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(6) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 8, (((bus_to_u16(&self.m[(9) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(8) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 10, (((bus_to_u16(&self.m[(11) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(10) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 12, (((bus_to_u16(&self.m[(13) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(12) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 14, (((bus_to_u16(&self.m[(15) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(14) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 16, (((bus_to_u16(&self.m[(17) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(16) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 18, (((bus_to_u16(&self.m[(19) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(18) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 20, (((bus_to_u16(&self.m[(21) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(20) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 22, (((bus_to_u16(&self.m[(23) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(22) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 24, (((bus_to_u16(&self.m[(25) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(24) as usize]) as u64) & 255u64) << 8));
+        println!("{}x: {}x", 26, (((bus_to_u16(&self.m[(27) as usize]) as u64) & 255u64) << 0) | (((bus_to_u16(&self.m[(26) as usize]) as u64) & 255u64) << 8));
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Main {
+    clock: WireRef,
+    cpux: Cpu,
+}
+
+impl Main {
+    pub fn new(
+    ) -> Self {
+        let clock = wire("clock");
+        Main {
+            clock: clock.clone(),
+            cpux: Cpu::new(clock.clone()),
+        }
+    }
+
+    pub fn eval(&mut self) {
+        self.cpux.eval();
+    }
+    pub fn run(&mut self) {
+        self.cpux.run();
+        if get(&self.clock) != Level::L { set(&self.clock, Level::L); }
+        loop {
+            self.eval();
+            if get(&self.clock) != get(&self.clock).not() { set(&self.clock, get(&self.clock).not()); }
+        }
+        self.eval();
+        return;
+    }
+}
+
+fn main() {
+    let mut tb = Main::new();
+    tb.run();
+}

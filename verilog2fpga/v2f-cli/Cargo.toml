@@ -1,0 +1,15 @@
+[package]
+name = "v2f"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "v2f"
+path = "src/main.rs"
+
+[dependencies]
+v2f-core = { path = "../v2f-core" }
+v2f-db = { path = "../v2f-db" }
+v2f-bitstream = { path = "../v2f-bitstream" }
+clap = { version = "4", features = ["derive"] }
+serde_json = "1"
