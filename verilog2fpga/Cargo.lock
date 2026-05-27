@@ -227,6 +227,7 @@ dependencies = [
  "v2f-bitstream",
  "v2f-core",
  "v2f-db",
+ "v2f-synth",
 ]
 
 [[package]]
@@ -247,6 +248,14 @@ dependencies = [
 [[package]]
 name = "v2f-db"
 version = "0.1.0"
+
+[[package]]
+name = "v2f-synth"
+version = "0.3.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "windows-link"

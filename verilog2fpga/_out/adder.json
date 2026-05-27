@@ -9994,7 +9994,7 @@
       "attributes": {
         "hdlname": "adder",
         "top": "00000000000000000000000000000001",
-        "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:1.1-13.10"
+        "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:1.1-13.10"
       },
       "ports": {
         "a": {
@@ -10021,7 +10021,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10044,7 +10044,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10069,7 +10069,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10092,7 +10092,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10115,7 +10115,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10140,7 +10140,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10163,7 +10163,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10184,7 +10184,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10205,35 +10205,35 @@
           "hide_name": 0,
           "bits": [ 2, 3, 4, 5 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:2.18-2.19"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:2.18-2.19"
           }
         },
         "b": {
           "hide_name": 0,
           "bits": [ 6, 7, 8, 9 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:3.18-3.19"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:3.18-3.19"
           }
         },
         "carry": {
           "hide_name": 0,
           "bits": [ 14 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:5.18-5.23"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:5.18-5.23"
           }
         },
         "result": {
           "hide_name": 0,
           "bits": [ 10, 11, 12, 13, 14 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:8.12-8.18"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:8.12-8.18"
           }
         },
         "sum": {
           "hide_name": 0,
           "bits": [ 10, 11, 12, 13 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:4.18-4.21"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:4.18-4.21"
           }
         },
         "sum_SB_LUT4_O_1_I3": {
@@ -10241,7 +10241,7 @@
           "bits": [ 17 ],
           "attributes": {
             "abc9_carry": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/abc9_model.v:4.9-4.11"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/abc9_model.v:4.9-4.11"
           }
         },
         "sum_SB_LUT4_O_3_I3": {
@@ -10249,7 +10249,7 @@
           "bits": [ 15 ],
           "attributes": {
             "abc9_carry": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/abc9_model.v:4.9-4.11"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/abc9_model.v:4.9-4.11"
           }
         },
         "sum_SB_LUT4_O_I3": {
@@ -10257,7 +10257,7 @@
           "bits": [ 16 ],
           "attributes": {
             "abc9_carry": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/abc9_model.v:4.9-4.11"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/adder/adder.v:9.17-9.22|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/abc9_model.v:4.9-4.11"
           }
         }
       }

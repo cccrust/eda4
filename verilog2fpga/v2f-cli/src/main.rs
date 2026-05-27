@@ -1,8 +1,9 @@
 mod pack;
 mod pnr;
 mod prog;
-mod synth;
+mod yosys_synth;
 
+use std::fs;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
@@ -10,7 +11,7 @@ use clap::{Parser, Subcommand};
 use v2f_core::{Device, V2fResult};
 
 #[derive(Parser)]
-#[command(name = "v2f", about = "Verilog → FPGA 工具鏈 (v0.2)")]
+#[command(name = "v2f", about = "Verilog → FPGA 工具鏈 (v0.3)")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -32,7 +33,7 @@ enum Command {
         #[arg(long, default_value_t = false)]
         rust: bool,
     },
-    /// 邏輯綜合 (Yosys)
+    /// 邏輯綜合
     Synth {
         input: PathBuf,
         #[arg(long, default_value = "output.json")]
@@ -41,6 +42,8 @@ enum Command {
         device: String,
         #[arg(long)]
         top: Option<String>,
+        #[arg(long, default_value_t = String::from("auto"))]
+        backend: String,
     },
     /// 佈局佈線 (nextpnr)
     Pnr {
@@ -89,7 +92,11 @@ fn main() -> V2fResult<()> {
             let asc_path = PathBuf::from(format!("{}.asc", output));
             let bin_path = PathBuf::from(format!("{}.bin", output));
 
-            synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+            if rust {
+                pure_synth(&input, &json_path, top.as_deref())?;
+            } else {
+                yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+            }
             println!("✓ 綜合完成: {}", json_path.display());
 
             pnr::run_pnr(&json_path, &asc_path, dev, pcf.as_deref())?;
@@ -110,13 +117,28 @@ fn main() -> V2fResult<()> {
         Command::Synth {
             input,
             output,
-            device,
+            device: _,
             top,
+            backend,
         } => {
-            let dev: Device = device
-                .parse()
-                .map_err(|e| v2f_core::V2fError::Config(e))?;
-            synth::run_synth(&input, &output, dev, top.as_deref())?;
+            match backend.as_str() {
+                "rust" => pure_synth(&input, &output, top.as_deref())?,
+                "yosys" | "auto" => {
+                    if yosys_synth::check_tool() {
+                        let dev = Device::HX8K;
+                        yosys_synth::run_synth(&input, &output, dev, top.as_deref())?;
+                    } else if backend == "auto" {
+                        pure_synth(&input, &output, top.as_deref())?;
+                    } else {
+                        return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
+                    }
+                }
+                _ => {
+                    return Err(v2f_core::V2fError::Config(format!(
+                        "未知 backend: {backend}。支援: auto, rust, yosys"
+                    )));
+                }
+            }
             println!("✓ 綜合完成: {}", output.display());
         }
         Command::Pnr {
@@ -171,11 +193,12 @@ fn main() -> V2fResult<()> {
             }
         }
         Command::Check => {
-            let checks: [(&str, bool); 4] = [
-                ("yosys", synth::check_tool()),
+            let checks: [(&str, bool); 5] = [
+                ("yosys", yosys_synth::check_tool()),
                 ("nextpnr-ice40", pnr::check_tool()),
                 ("icepack", pack::check_tool()),
                 ("openFPGALoader/iceprog", prog::check_tool()),
+                ("v2f-synth (pure Rust)", true),
             ];
             for (name, ok) in &checks {
                 let mark = if *ok { "✓" } else { "✗" };
@@ -185,5 +208,14 @@ fn main() -> V2fResult<()> {
         }
     }
 
+    Ok(())
+}
+
+/// 使用純 Rust 綜合器
+fn pure_synth(input: &PathBuf, output: &PathBuf, top: Option<&str>) -> V2fResult<()> {
+    let src = fs::read_to_string(input).map_err(|e| v2f_core::V2fError::Io(e))?;
+    let top_name = top.unwrap_or("top");
+    let json = v2f_synth::synthesize(&src, top_name);
+    fs::write(output, &json).map_err(|e| v2f_core::V2fError::Io(e))?;
     Ok(())
 }

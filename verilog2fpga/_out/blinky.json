@@ -10064,7 +10064,7 @@
       "attributes": {
         "hdlname": "blinky",
         "top": "00000000000000000000000000000001",
-        "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:1.1-14.10"
+        "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:1.1-14.10"
       },
       "ports": {
         "clk": {
@@ -10084,7 +10084,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10104,7 +10104,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10124,7 +10124,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10145,7 +10145,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10168,7 +10168,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10190,7 +10190,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10211,7 +10211,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10234,7 +10234,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10256,7 +10256,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10277,7 +10277,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10300,7 +10300,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10322,7 +10322,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10343,7 +10343,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10366,7 +10366,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10388,7 +10388,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10409,7 +10409,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10432,7 +10432,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10454,7 +10454,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10475,7 +10475,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10498,7 +10498,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10520,7 +10520,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10541,7 +10541,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10564,7 +10564,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10586,7 +10586,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10607,7 +10607,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10630,7 +10630,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10652,7 +10652,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10673,7 +10673,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10696,7 +10696,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10718,7 +10718,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10739,7 +10739,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10762,7 +10762,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10785,7 +10785,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10808,7 +10808,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10830,7 +10830,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10850,7 +10850,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10871,7 +10871,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10894,7 +10894,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10916,7 +10916,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -10937,7 +10937,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -10960,7 +10960,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -10982,7 +10982,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11003,7 +11003,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11026,7 +11026,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11048,7 +11048,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11069,7 +11069,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11093,7 +11093,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11139,7 +11139,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11162,7 +11162,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11184,7 +11184,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11205,7 +11205,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11228,7 +11228,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11250,7 +11250,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11271,7 +11271,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11294,7 +11294,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11316,7 +11316,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11337,7 +11337,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11360,7 +11360,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11382,7 +11382,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11403,7 +11403,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11426,7 +11426,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11448,7 +11448,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11469,7 +11469,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11492,7 +11492,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11514,7 +11514,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11535,7 +11535,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11558,7 +11558,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11580,7 +11580,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11601,7 +11601,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11624,7 +11624,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11647,7 +11647,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11670,7 +11670,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11692,7 +11692,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:8.1-10.4|/opt/homebrew/bin/../share/yosys/ice40/ff_map.v:2.51-2.90"
           },
           "port_directions": {
             "C": "input",
@@ -11713,7 +11713,7 @@
           },
           "attributes": {
             "module_not_derived": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:26.33-27.52"
           },
           "port_directions": {
             "I0": "input",
@@ -11736,7 +11736,7 @@
           "parameters": {
           },
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4"
           },
           "port_directions": {
             "CI": "input",
@@ -11757,14 +11757,14 @@
           "hide_name": 0,
           "bits": [ 2 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:2.12-2.15"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:2.12-2.15"
           }
         },
         "counter": {
           "hide_name": 0,
           "bits": [ 51, 52, 49, 46, 39, 36, 33, 30, 27, 24, 21, 18, 15, 12, 9, 74, 71, 68, 65, 62, 59, 56, 42, 7, 5, 3 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:6.12-6.19"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:6.12-6.19"
           }
         },
         "counter_SB_DFF_Q_10_D": {
@@ -11778,7 +11778,7 @@
           "bits": [ "0", "0", 9, 10 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_11_D": {
@@ -11792,7 +11792,7 @@
           "bits": [ "0", "0", 12, 11 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_12_D": {
@@ -11806,7 +11806,7 @@
           "bits": [ "0", "0", 15, 14 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_13_D": {
@@ -11820,7 +11820,7 @@
           "bits": [ "0", "0", 18, 17 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_14_D": {
@@ -11834,7 +11834,7 @@
           "bits": [ "0", "0", 21, 20 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_15_D": {
@@ -11848,7 +11848,7 @@
           "bits": [ "0", "0", 24, 23 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_16_D": {
@@ -11862,7 +11862,7 @@
           "bits": [ "0", "0", 27, 26 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_17_D": {
@@ -11876,7 +11876,7 @@
           "bits": [ "0", "0", 30, 29 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_18_D": {
@@ -11890,7 +11890,7 @@
           "bits": [ "0", "0", 33, 32 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_19_D": {
@@ -11904,7 +11904,7 @@
           "bits": [ "0", "0", 36, 35 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_1_D": {
@@ -11918,7 +11918,7 @@
           "bits": [ "0", "0", 7, 40 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_20_D": {
@@ -11932,7 +11932,7 @@
           "bits": [ "0", "0", 39, 38 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_21_D": {
@@ -11946,7 +11946,7 @@
           "bits": [ "0", "0", 46, 45 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_22_D": {
@@ -11960,7 +11960,7 @@
           "bits": [ "0", "0", 49, 48 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_23_D": {
@@ -11986,7 +11986,7 @@
           "bits": [ "0", "0", 42, 41 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_3_D": {
@@ -12000,7 +12000,7 @@
           "bits": [ "0", "0", 56, 55 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_4_D": {
@@ -12014,7 +12014,7 @@
           "bits": [ "0", "0", 59, 58 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_5_D": {
@@ -12028,7 +12028,7 @@
           "bits": [ "0", "0", 62, 61 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_6_D": {
@@ -12042,7 +12042,7 @@
           "bits": [ "0", "0", 65, 64 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_7_D": {
@@ -12056,7 +12056,7 @@
           "bits": [ "0", "0", 68, 67 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_8_D": {
@@ -12070,7 +12070,7 @@
           "bits": [ "0", "0", 71, 70 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_9_D": {
@@ -12084,7 +12084,7 @@
           "bits": [ "0", "0", 74, 73 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "counter_SB_DFF_Q_D": {
@@ -12098,14 +12098,14 @@
           "bits": [ "0", "0", 5, 76 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         },
         "led": {
           "hide_name": 0,
           "bits": [ 3 ],
           "attributes": {
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:3.12-3.15"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:3.12-3.15"
           }
         },
         "led_SB_DFF_Q_D": {
@@ -12119,7 +12119,7 @@
           "bits": [ "0", "0", 3, 78 ],
           "attributes": {
             "force_downto": "00000000000000000000000000000001",
-            "src": "/Users/Shared/ccc/project/computer4/eda/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
+            "src": "/Users/Shared/ccc/project/eda4/verilog2fpga/examples/blinky/blinky.v:9.16-9.27|/opt/homebrew/bin/../share/yosys/ice40/arith_map.v:62.5-70.4|/opt/homebrew/bin/../share/yosys/ice40/cells_map.v:6.21-6.22"
           }
         }
       }
