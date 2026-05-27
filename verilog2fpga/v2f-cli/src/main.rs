@@ -101,17 +101,17 @@ fn main() -> V2fResult<()> {
 
             match lang.as_str() {
                 "rust" => {
-                    let module = v2f_rust::HdlModule::new(top.as_deref().unwrap_or("top"))
-                        .input("clk", 1)
-                        .output("led", 1)
-                        .reg("counter", 26)
-                        .dff("counter", v2f_rust::HdlExpr::Add(
-                            Box::new(v2f_rust::HdlExpr::Ident("counter".into())),
-                            Box::new(v2f_rust::HdlExpr::Const(1, 26)),
-                        ))
-                        .assign("led", v2f_rust::HdlExpr::Index(
-                            Box::new(v2f_rust::HdlExpr::Ident("counter".into())), 25,
-                        ));
+                    let module = v2f_rust::fpga! {
+                        module Blinky {
+                            input clk: 1,
+                            output led: 1,
+                            reg [25:0] counter,
+                            always(posedge clk) {
+                                counter <= counter + 1;
+                            }
+                            assign led = counter[25];
+                        }
+                    };
                     let json = v2f_rust::compile(&module);
                     fs::write(&json_path, &json)
                         .map_err(|e| v2f_core::V2fError::Io(e))?;

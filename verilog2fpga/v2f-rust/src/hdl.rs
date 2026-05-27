@@ -70,6 +70,17 @@ impl HdlModule {
         self
     }
 
+    pub fn inout(mut self, name: &str, width: u32) -> Self {
+        self.ports.push(HdlPort { name: name.to_string(), direction: HdlPortDir::Inout, width });
+        self.stmts.push(HdlStmt::DeclWire { name: name.to_string(), width });
+        self
+    }
+
+    pub fn blocking(mut self, target: &str, value: HdlExpr) -> Self {
+        self.stmts.push(HdlStmt::Blocking { target: target.to_string(), value });
+        self
+    }
+
     pub fn dff(mut self, target: &str, value: HdlExpr) -> Self {
         self.stmts.push(HdlStmt::Nonblocking { target: target.to_string(), value });
         self

@@ -5,5 +5,6 @@ edition = "2021"
 
 [dependencies]
 v2f-core = { path = "../v2f-core" }
+v2f-rust-macros = { path = "../v2f-rust-macros" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
