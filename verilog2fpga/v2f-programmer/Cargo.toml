@@ -1,0 +1,11 @@
+[package]
+name = "v2f-programmer"
+version = "0.5.0"
+edition = "2021"
+
+[dependencies]
+v2f-core = { path = "../v2f-core" }
+
+[features]
+default = []
+ftdi = []   # 啟用 libftd2xx-sys 支援（需硬體）

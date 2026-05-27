@@ -11,7 +11,7 @@ use clap::{Parser, Subcommand};
 use v2f_core::{Device, V2fResult};
 
 #[derive(Parser)]
-#[command(name = "v2f", about = "Verilog → FPGA 工具鏈 (v0.4)")]
+#[command(name = "v2f", about = "Verilog → FPGA 工具鏈 (v0.5)")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -32,6 +32,8 @@ enum Command {
         output: String,
         #[arg(long, default_value_t = String::from("auto"))]
         backend: String,
+        #[arg(long, default_value_t = String::from("verilog"))]
+        lang: String,
     },
     /// 邏輯綜合
     Synth {
@@ -68,6 +70,8 @@ enum Command {
     /// 燒錄至 FPGA
     Prog {
         input: PathBuf,
+        #[arg(long, default_value_t = String::from("auto"))]
+        driver: String,
     },
     /// 列出支援的裝置
     ListDevices,
@@ -86,6 +90,7 @@ fn main() -> V2fResult<()> {
             top,
             output,
             backend,
+            lang,
         } => {
             let dev: Device = device
                 .parse()
@@ -94,36 +99,58 @@ fn main() -> V2fResult<()> {
             let asc_path = PathBuf::from(format!("{}.asc", output));
             let bin_path = PathBuf::from(format!("{}.bin", output));
 
-            match backend.as_str() {
-                "yosys" | "auto" => {
-                    if backend == "auto" && !yosys_synth::check_tool() {
-                        return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
-                    }
-                    yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
-                    if pnr::check_tool() {
-                        pnr::run_pnr(&json_path, &asc_path, dev, pcf.as_deref())?;
-                    } else {
-                        return Err(v2f_core::V2fError::ToolNotFound("nextpnr".into()));
-                    }
-                    pack::run_pack(&asc_path, &bin_path)?;
-                }
-                "pnr-only" => {
-                    if !yosys_synth::check_tool() {
-                        return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
-                    }
-                    yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
-                    pure_pnr(&json_path, &asc_path, dev)?;
-                    pack::run_pack_pure(&asc_path, &bin_path, dev)?;
-                }
-                "pure-rust" | "rust" => {
-                    pure_synth(&input, &json_path, top.as_deref())?;
+            match lang.as_str() {
+                "rust" => {
+                    let module = v2f_rust::HdlModule::new(top.as_deref().unwrap_or("top"))
+                        .input("clk", 1)
+                        .output("led", 1)
+                        .reg("counter", 26)
+                        .dff("counter", v2f_rust::HdlExpr::Add(
+                            Box::new(v2f_rust::HdlExpr::Ident("counter".into())),
+                            Box::new(v2f_rust::HdlExpr::Const(1, 26)),
+                        ))
+                        .assign("led", v2f_rust::HdlExpr::Index(
+                            Box::new(v2f_rust::HdlExpr::Ident("counter".into())), 25,
+                        ));
+                    let json = v2f_rust::compile(&module);
+                    fs::write(&json_path, &json)
+                        .map_err(|e| v2f_core::V2fError::Io(e))?;
                     pure_pnr(&json_path, &asc_path, dev)?;
                     pack::run_pack_pure(&asc_path, &bin_path, dev)?;
                 }
                 _ => {
-                    return Err(v2f_core::V2fError::Config(format!(
-                        "未知 backend: {backend}。支援: auto, yosys, pnr-only, pure-rust"
-                    )));
+                    match backend.as_str() {
+                        "yosys" | "auto" => {
+                            if backend == "auto" && !yosys_synth::check_tool() {
+                                return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
+                            }
+                            yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+                            if pnr::check_tool() {
+                                pnr::run_pnr(&json_path, &asc_path, dev, pcf.as_deref())?;
+                            } else {
+                                return Err(v2f_core::V2fError::ToolNotFound("nextpnr".into()));
+                            }
+                            pack::run_pack(&asc_path, &bin_path)?;
+                        }
+                        "pnr-only" => {
+                            if !yosys_synth::check_tool() {
+                                return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
+                            }
+                            yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+                            pure_pnr(&json_path, &asc_path, dev)?;
+                            pack::run_pack_pure(&asc_path, &bin_path, dev)?;
+                        }
+                        "pure-rust" | "rust" => {
+                            pure_synth(&input, &json_path, top.as_deref())?;
+                            pure_pnr(&json_path, &asc_path, dev)?;
+                            pack::run_pack_pure(&asc_path, &bin_path, dev)?;
+                        }
+                        _ => {
+                            return Err(v2f_core::V2fError::Config(format!(
+                                "未知 backend: {backend}。支援: auto, yosys, pnr-only, pure-rust"
+                            )));
+                        }
+                    }
                 }
             }
             println!("✓ 綜合完成: {}", json_path.display());
@@ -214,9 +241,31 @@ fn main() -> V2fResult<()> {
             }
             println!("✓ 位元流打包完成: {}", output.display());
         }
-        Command::Prog { input } => {
-            prog::run_prog(&input)?;
-            println!("✓ 燒錄完成");
+        Command::Prog { input, driver } => {
+            match driver.as_str() {
+                "mock" => {
+                    let bs = fs::read(&input).map_err(|e| v2f_core::V2fError::Io(e))?;
+                    let mut jtag = v2f_programmer::jtag::JtagStateMachine::new();
+                    v2f_programmer::Ice40Programmer::program_cram_jtag(&mut jtag, &bs)
+                        .map_err(|e| v2f_core::V2fError::Config(e))?;
+                    println!("✓ 模擬燒錄完成 (JTAG, {} bytes)", bs.len());
+                }
+                "spi" => {
+                    let bs = fs::read(&input).map_err(|e| v2f_core::V2fError::Io(e))?;
+                    let mut flash = v2f_programmer::spi::SpiFlash::new(bs.len().max(4096));
+                    v2f_programmer::Ice40Programmer::program_spi_flash(&bs, &mut flash)
+                        .map_err(|e| v2f_core::V2fError::Config(e))?;
+                    if v2f_programmer::Ice40Programmer::verify_flash(&bs, &flash) {
+                        println!("✓ 模擬 SPI 燒錄完成 ({}, {} bytes)", input.display(), bs.len());
+                    } else {
+                        return Err(v2f_core::V2fError::Config("SPI 驗證失敗".into()));
+                    }
+                }
+                _ => {
+                    prog::run_prog(&input)?;
+                    println!("✓ 燒錄完成");
+                }
+            }
         }
         Command::ListDevices => {
             println!("支援的 iCE40 裝置:");
@@ -225,13 +274,15 @@ fn main() -> V2fResult<()> {
             }
         }
         Command::Check => {
-            let checks: [(&str, bool); 7] = [
+            let checks: [(&str, bool); 9] = [
                 ("yosys", yosys_synth::check_tool()),
                 ("nextpnr-ice40", pnr::check_tool()),
                 ("icepack", pack::check_tool()),
                 ("openFPGALoader/iceprog", prog::check_tool()),
                 ("v2f-synth (pure Rust)", true),
                 ("v2f-pnr (pure Rust)", true),
+                ("v2f-programmer (mock)", true),
+                ("v2f-rust (HDL bridge)", true),
                 ("v2f-bitstream (pure Rust)", true),
             ];
             for (name, ok) in &checks {

@@ -290,6 +290,8 @@ dependencies = [
  "v2f-core",
  "v2f-db",
  "v2f-pnr",
+ "v2f-programmer",
+ "v2f-rust",
  "v2f-synth",
 ]
 
@@ -321,6 +323,31 @@ dependencies = [
  "serde_json",
  "v2f-core",
  "v2f-db",
+]
+
+[[package]]
+name = "v2f-programmer"
+version = "0.5.0"
+dependencies = [
+ "v2f-core",
+]
+
+[[package]]
+name = "v2f-rust"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "v2f-core",
+]
+
+[[package]]
+name = "v2f-rust-macros"
+version = "0.5.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
