@@ -12,5 +12,6 @@ v2f-core = { path = "../v2f-core" }
 v2f-db = { path = "../v2f-db" }
 v2f-bitstream = { path = "../v2f-bitstream" }
 v2f-synth = { path = "../v2f-synth" }
+v2f-pnr = { path = "../v2f-pnr" }
 clap = { version = "4", features = ["derive"] }
 serde_json = "1"

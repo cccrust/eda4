@@ -11,7 +11,7 @@ use clap::{Parser, Subcommand};
 use v2f_core::{Device, V2fResult};
 
 #[derive(Parser)]
-#[command(name = "v2f", about = "Verilog → FPGA 工具鏈 (v0.3)")]
+#[command(name = "v2f", about = "Verilog → FPGA 工具鏈 (v0.4)")]
 struct Cli {
     #[command(subcommand)]
     command: Command,
@@ -30,8 +30,8 @@ enum Command {
         top: Option<String>,
         #[arg(long, default_value = "output")]
         output: String,
-        #[arg(long, default_value_t = false)]
-        rust: bool,
+        #[arg(long, default_value_t = String::from("auto"))]
+        backend: String,
     },
     /// 邏輯綜合
     Synth {
@@ -45,7 +45,7 @@ enum Command {
         #[arg(long, default_value_t = String::from("auto"))]
         backend: String,
     },
-    /// 佈局佈線 (nextpnr)
+    /// 佈局佈線
     Pnr {
         input: PathBuf,
         #[arg(long, default_value = "output.asc")]
@@ -54,6 +54,8 @@ enum Command {
         device: String,
         #[arg(long)]
         pcf: Option<PathBuf>,
+        #[arg(long, default_value_t = String::from("auto"))]
+        backend: String,
     },
     /// 打包位元流
     Pack {
@@ -83,7 +85,7 @@ fn main() -> V2fResult<()> {
             pcf,
             top,
             output,
-            rust,
+            backend,
         } => {
             let dev: Device = device
                 .parse()
@@ -92,27 +94,41 @@ fn main() -> V2fResult<()> {
             let asc_path = PathBuf::from(format!("{}.asc", output));
             let bin_path = PathBuf::from(format!("{}.bin", output));
 
-            if rust {
-                pure_synth(&input, &json_path, top.as_deref())?;
-            } else {
-                yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+            match backend.as_str() {
+                "yosys" | "auto" => {
+                    if backend == "auto" && !yosys_synth::check_tool() {
+                        return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
+                    }
+                    yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+                    if pnr::check_tool() {
+                        pnr::run_pnr(&json_path, &asc_path, dev, pcf.as_deref())?;
+                    } else {
+                        return Err(v2f_core::V2fError::ToolNotFound("nextpnr".into()));
+                    }
+                    pack::run_pack(&asc_path, &bin_path)?;
+                }
+                "pnr-only" => {
+                    if !yosys_synth::check_tool() {
+                        return Err(v2f_core::V2fError::ToolNotFound("yosys".into()));
+                    }
+                    yosys_synth::run_synth(&input, &json_path, dev, top.as_deref())?;
+                    pure_pnr(&json_path, &asc_path, dev)?;
+                    pack::run_pack_pure(&asc_path, &bin_path, dev)?;
+                }
+                "pure-rust" | "rust" => {
+                    pure_synth(&input, &json_path, top.as_deref())?;
+                    pure_pnr(&json_path, &asc_path, dev)?;
+                    pack::run_pack_pure(&asc_path, &bin_path, dev)?;
+                }
+                _ => {
+                    return Err(v2f_core::V2fError::Config(format!(
+                        "未知 backend: {backend}。支援: auto, yosys, pnr-only, pure-rust"
+                    )));
+                }
             }
             println!("✓ 綜合完成: {}", json_path.display());
-
-            pnr::run_pnr(&json_path, &asc_path, dev, pcf.as_deref())?;
             println!("✓ 佈局佈線完成: {}", asc_path.display());
-
-            if rust {
-                pack::run_pack_pure(&asc_path, &bin_path, dev)?;
-            } else {
-                pack::run_pack(&asc_path, &bin_path)?;
-            }
             println!("✓ 位元流打包完成: {}", bin_path.display());
-
-            println!(
-                "完整流程完成。執行 'v2f prog {}' 燒錄。",
-                bin_path.display()
-            );
         }
         Command::Synth {
             input,
@@ -145,12 +161,28 @@ fn main() -> V2fResult<()> {
             input,
             output,
             device,
-            pcf,
+            pcf: _,
+            backend,
         } => {
             let dev: Device = device
                 .parse()
                 .map_err(|e| v2f_core::V2fError::Config(e))?;
-            pnr::run_pnr(&input, &output, dev, pcf.as_deref())?;
+            match backend.as_str() {
+                "rust" | "pure-rust" | "pnr-only" => pure_pnr(&input, &output, dev)?,
+                "yosys" | "auto" => {
+                    if pnr::check_tool() {
+                        let pcf_path: Option<&std::path::Path> = None;
+                        pnr::run_pnr(&input, &output, dev, pcf_path)?;
+                    } else {
+                        pure_pnr(&input, &output, dev)?;
+                    }
+                }
+                _ => {
+                    return Err(v2f_core::V2fError::Config(format!(
+                        "未知 backend: {backend}。支援: auto, yosys, pnr-only, pure-rust"
+                    )));
+                }
+            }
             println!("✓ 佈局佈線完成: {}", output.display());
         }
         Command::Pack {
@@ -193,12 +225,14 @@ fn main() -> V2fResult<()> {
             }
         }
         Command::Check => {
-            let checks: [(&str, bool); 5] = [
+            let checks: [(&str, bool); 7] = [
                 ("yosys", yosys_synth::check_tool()),
                 ("nextpnr-ice40", pnr::check_tool()),
                 ("icepack", pack::check_tool()),
                 ("openFPGALoader/iceprog", prog::check_tool()),
                 ("v2f-synth (pure Rust)", true),
+                ("v2f-pnr (pure Rust)", true),
+                ("v2f-bitstream (pure Rust)", true),
             ];
             for (name, ok) in &checks {
                 let mark = if *ok { "✓" } else { "✗" };
@@ -211,11 +245,18 @@ fn main() -> V2fResult<()> {
     Ok(())
 }
 
-/// 使用純 Rust 綜合器
 fn pure_synth(input: &PathBuf, output: &PathBuf, top: Option<&str>) -> V2fResult<()> {
     let src = fs::read_to_string(input).map_err(|e| v2f_core::V2fError::Io(e))?;
     let top_name = top.unwrap_or("top");
     let json = v2f_synth::synthesize(&src, top_name);
     fs::write(output, &json).map_err(|e| v2f_core::V2fError::Io(e))?;
+    Ok(())
+}
+
+fn pure_pnr(json_path: &PathBuf, asc_path: &PathBuf, dev: Device) -> V2fResult<()> {
+    let json_str =
+        fs::read_to_string(json_path).map_err(|e| v2f_core::V2fError::Io(e))?;
+    let asc = v2f_pnr::run_pnr(&json_str, dev);
+    fs::write(asc_path, &asc).map_err(|e| v2f_core::V2fError::Io(e))?;
     Ok(())
 }
