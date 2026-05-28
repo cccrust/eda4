@@ -184,6 +184,121 @@ async fn main() -> std::io::Result<()> {
 mod tests {
     use super::*;
 
+    mod examples {
+        pub const ALU: &str = r#"module ALU(a, b, op, result, zero);
+  input [7:0] a, b;
+  input [2:0] op;
+  output reg [7:0] result;
+  output reg zero;
+  always @(*) begin
+    case (op)
+      0: result = a + b;
+      1: result = a - b;
+      2: result = a & b;
+      3: result = a | b;
+      4: result = a ^ b;
+      5: result = a << 1;
+      6: result = a >> 1;
+      default: result = 8'b0;
+    endcase
+    zero = (result == 0);
+  end
+endmodule
+
+module alu_tb;
+  reg [7:0] a, b;
+  reg [2:0] op;
+  wire [7:0] result;
+  wire zero;
+  ALU uut(a, b, op, result, zero);
+  initial begin
+    $display("=== ALU (8-bit) Test ===");
+    $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=0; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=1; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=2; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=3; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=4; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=5; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=10; b=5;  op=6; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    a=0;  b=0;  op=0; #1 $display("  a=%d  b=%d  op=%d  => result=%d  zero=%b", a, b, op, result, zero);
+    $display("=========================");
+    $finish;
+  end
+endmodule"#;
+
+        pub const DECODER: &str = r#"module Decoder2x4(enable, in, out);
+  input enable;
+  input [1:0] in;
+  output [3:0] out;
+  wire [1:0] not_in;
+  not u0(not_in[0], in[0]);
+  not u1(not_in[1], in[1]);
+  and u2(out[0], enable, not_in[1], not_in[0]);
+  and u3(out[1], enable, not_in[1], in[0]);
+  and u4(out[2], enable, in[1], not_in[0]);
+  and u5(out[3], enable, in[1], in[0]);
+endmodule
+
+module decoder_tb;
+  reg enable;
+  reg [1:0] in;
+  wire [3:0] out;
+  Decoder2x4 uut(enable, in, out);
+  initial begin
+    $display("=== Decoder 2x4 Test ===");
+    $display("  en in | out[3:0]");
+    enable=1;
+    in=0; #1 $display("   %b  %b | %b%b%b%b", enable, in, out[3], out[2], out[1], out[0]);
+    in=1; #1 $display("   %b  %b | %b%b%b%b", enable, in, out[3], out[2], out[1], out[0]);
+    in=2; #1 $display("   %b  %b | %b%b%b%b", enable, in, out[3], out[2], out[1], out[0]);
+    in=3; #1 $display("   %b  %b | %b%b%b%b", enable, in, out[3], out[2], out[1], out[0]);
+    enable=0; in=0; #1 $display("   %b  %b | %b%b%b%b", enable, in, out[3], out[2], out[1], out[0]);
+    $display("=========================");
+    $finish;
+  end
+endmodule"#;
+
+        pub const FSM: &str = r#"module FSM(clk, rst, in, out);
+  input clk, rst, in;
+  output reg [1:0] out;
+  reg [1:0] state;
+  parameter S0=2'b00, S1=2'b01, S2=2'b10;
+  always @(posedge clk) begin
+    if (rst) state <= S0;
+    else case (state)
+      S0: state <= in ? S1 : S0;
+      S1: state <= in ? S2 : S0;
+      S2: state <= S0;
+    endcase
+  end
+  always @(*) case(state) S0: out=2'b01; S1: out=2'b10; S2: out=2'b11; endcase
+endmodule
+
+module fsm_tb;
+  reg clk, rst, in;
+  wire [1:0] out;
+  FSM uut(clk, rst, in, out);
+  initial begin
+    $display("=== FSM (Moore, 3-state) Test ===");
+    $display("  clk  rst  in | state  out");
+    clk=0; rst=1; in=0;
+    #1 $display("  %b    %b    %b  | S0     %b%b", clk, rst, in, out[1], out[0]);
+    rst=0; #1
+    in=1; clk=1; #1 clk=0;
+    #1 $display("  %b    %b    %b  | S1     %b%b", clk, rst, in, out[1], out[0]);
+    clk=1; #1 clk=0;
+    in=1; #1 $display("  %b    %b    %b  | S2     %b%b", clk, rst, in, out[1], out[0]);
+    clk=1; #1 clk=0;
+    in=0; #1 $display("  %b    %b    %b  | S0     %b%b", clk, rst, in, out[1], out[0]);
+    clk=1; #1 clk=0;
+    in=1; #1 $display("  %b    %b    %b  | S1     %b%b", clk, rst, in, out[1], out[0]);
+    $display("==================================");
+    $finish;
+  end
+endmodule"#;
+    }
+
     fn sr(code: String, analysis: SpiceAnalysisType) -> Request {
         Request::SpiceAnalyze {
             code,
@@ -330,6 +445,44 @@ mod tests {
             }
             _ => panic!("Expected VerilogSimResult"),
         }
+    }
+
+    fn sim_test(code: &str) -> Response {
+        handle_request(Request::VerilogSim { code: code.into(), top: None })
+    }
+
+    fn assert_sim_ok(resp: Response, expected: &str) {
+        match resp {
+            Response::VerilogSimResult { stdout, stderr, generated_rust } => {
+                if !generated_rust.is_empty() {
+                    let has_compile_error = stderr.contains("Compilation failed") || stderr.contains("error[");
+                    if !has_compile_error {
+                        assert!(stdout.contains(expected),
+                            "stdout should contain '{}'. stdout: {:?}, stderr: {:?}", expected, stdout, stderr);
+                        return;
+                    }
+                }
+                panic!("Simulation failed:\n  generated_rust.len={}\n  stderr={}\n  stdout={}",
+                    generated_rust.len(), stderr, stdout);
+            }
+            Response::Error { error } => panic!("Simulation returned error: {}", error),
+            _ => panic!("Unexpected response type"),
+        }
+    }
+
+    #[tokio::test]
+    async fn test_sim_alu_frontend() {
+        assert_sim_ok(sim_test(examples::ALU), "ALU");
+    }
+
+    #[tokio::test]
+    async fn test_sim_decoder_frontend() {
+        assert_sim_ok(sim_test(examples::DECODER), "Decoder");
+    }
+
+    #[tokio::test]
+    async fn test_sim_fsm_frontend() {
+        assert_sim_ok(sim_test(examples::FSM), "FSM");
     }
 
     #[tokio::test]

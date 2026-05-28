@@ -73,8 +73,17 @@ function handleResponse(resp) {
         outEl.className = 'output error';
       } else {
         const hasOut = resp.stdout && resp.stdout.trim();
-        outEl.textContent = hasOut ? resp.stdout : '(no output — design may not have $display or initial blocks)';
-        outEl.className = hasOut ? 'output success' : 'output';
+        const hasErr = resp.stderr && resp.stderr.trim();
+        if (hasOut) {
+          outEl.textContent = resp.stdout;
+          outEl.className = 'output success';
+        } else if (hasErr) {
+          outEl.textContent = resp.stderr;
+          outEl.className = 'output error';
+        } else {
+          outEl.textContent = '(no output — design may not have $display or initial blocks)';
+          outEl.className = 'output';
+        }
         if (resp.generated_rust) {
           genEl.textContent = resp.generated_rust;
         }
@@ -593,20 +602,20 @@ module fsm_tb;
   reg clk, rst, in;
   wire [1:0] out;
   FSM uut(clk, rst, in, out);
-  always #5 clk = ~clk;
   initial begin
     $display("=== FSM (Moore, 3-state) Test ===");
     $display("  clk  rst  in | state  out");
     clk=0; rst=1; in=0;
-    #7 $display("  %b    %b    %b  | S0     %b%b", clk, rst, in, out[1], out[0]);
-    #10 rst=0; in=1;
-    #7 $display("  %b    %b    %b  | S1     %b%b", clk, rst, in, out[1], out[0]);
-    #10 in=1;
-    #7 $display("  %b    %b    %b  | S2     %b%b", clk, rst, in, out[1], out[0]);
-    #10 in=0;
-    #7 $display("  %b    %b    %b  | S0     %b%b", clk, rst, in, out[1], out[0]);
-    #10 in=1;
-    #7 $display("  %b    %b    %b  | S1     %b%b", clk, rst, in, out[1], out[0]);
+    #1 $display("  %b    %b    %b  | S0     %b%b", clk, rst, in, out[1], out[0]);
+    rst=0; #1
+    in=1; clk=1; #1 clk=0;
+    #1 $display("  %b    %b    %b  | S1     %b%b", clk, rst, in, out[1], out[0]);
+    clk=1; #1 clk=0;
+    in=1; #1 $display("  %b    %b    %b  | S2     %b%b", clk, rst, in, out[1], out[0]);
+    clk=1; #1 clk=0;
+    in=0; #1 $display("  %b    %b    %b  | S0     %b%b", clk, rst, in, out[1], out[0]);
+    clk=1; #1 clk=0;
+    in=1; #1 $display("  %b    %b    %b  | S1     %b%b", clk, rst, in, out[1], out[0]);
     $display("==================================");
     $finish;
   end

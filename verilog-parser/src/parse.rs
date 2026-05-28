@@ -729,6 +729,14 @@ impl Parser {
         let mut lhs = self.parse_primary();
         loop {
             let tok = match self.toks.get(self.pos) { Some(t) => t.clone(), None => break };
+            if tok == Token::Question {
+                self.pos += 1;
+                let if_true = self.parse_expr(0);
+                expect!(self, Token::Colon);
+                let if_false = self.parse_expr(min_prec);
+                lhs = Expr::Cond { cond: Box::new(lhs), if_true: Box::new(if_true), if_false: Box::new(if_false) };
+                continue;
+            }
             let (lbp, rbp) = match self.bp(&tok) { Some(p) => p, None => break };
             if lbp < min_prec { break; }
             self.pos += 1;

@@ -746,10 +746,10 @@ fn gen_expr_val(expr: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<
                 BinaryOp::Geq => format!("if ({}) >= ({}) {{ 1 }} else {{ 0 }}", l, r),
                 BinaryOp::Eq => format!("if ({}) == ({}) {{ 1 }} else {{ 0 }}", l, r),
                 BinaryOp::Neq => format!("if ({}) != ({}) {{ 1 }} else {{ 0 }}", l, r),
-                BinaryOp::Shl => format!("({} << {})", l, r),
-                BinaryOp::Shr => format!("({} >> {})", l, r),
-                BinaryOp::Sshl => format!("({} << {})", l, r),
-                BinaryOp::Sshr => format!("({} >> {})", l, r),
+                BinaryOp::Shl => format!("(({}) << {})", l, r),
+                BinaryOp::Shr => format!("(({}) >> {})", l, r),
+                BinaryOp::Sshl => format!("(({}) << {})", l, r),
+                BinaryOp::Sshr => format!("(({}) >> {})", l, r),
                 BinaryOp::LogicalAnd => format!("if {} != 0 && {} != 0 {{ 1 }} else {{ 0 }}", l, r),
                 BinaryOp::LogicalOr => format!("if {} != 0 || {} != 0 {{ 1 }} else {{ 0 }}", l, r),
                 BinaryOp::BitXnor => format!("!({} ^ {})", l, r),
@@ -1028,7 +1028,21 @@ fn to_snake(s: &str) -> String {
         }
         out.push(c.to_ascii_lowercase());
     }
-    out
+    escape_rust_ident(&out)
+}
+
+fn escape_rust_ident(s: &str) -> String {
+    if matches!(s,
+        "as" | "async" | "await" | "break" | "continue" | "crate" | "dyn" | "else"
+        | "enum" | "extern" | "false" | "fn" | "for" | "if" | "impl" | "in" | "let"
+        | "loop" | "match" | "mod" | "move" | "mut" | "pub" | "ref" | "return" | "self"
+        | "static" | "struct" | "super" | "trait" | "true" | "type" | "union" | "unsafe"
+        | "use" | "where" | "while"
+    ) {
+        format!("r#{}", s)
+    } else {
+        s.to_string()
+    }
 }
 
 pub fn gen_ruhdl(modules: &[Module]) -> String {

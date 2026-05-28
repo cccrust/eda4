@@ -23,30 +23,39 @@ fn build_lib_rlib() -> Result<String, String> {
     let cache = std::path::Path::new(RLIB_CACHE);
     std::fs::create_dir_all(cache).map_err(|e| e.to_string())?;
     let rlib_path = format!("{}/libverilog2rust.rlib", RLIB_CACHE);
+    let parser_rlib = format!("{}/libverilog_parser.rlib", RLIB_CACHE);
 
     if std::path::Path::new(&rlib_path).exists() {
         return Ok(rlib_path);
     }
 
-    let lib_src = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../verilog2rust/src/lib.rs");
+    let manifest = env!("CARGO_MANIFEST_DIR");
 
+    let parser_src = std::path::Path::new(manifest)
+        .join("../../verilog-parser/src/lib.rs");
     let output = Command::new("rustc")
-        .args([
-            "--crate-type", "lib",
-            "--crate-name", "verilog2rust",
-            "--out-dir", RLIB_CACHE,
-            lib_src.to_str().unwrap(),
-            "--edition", "2021",
-        ])
+        .args(["--crate-type", "lib", "--crate-name", "verilog_parser",
+               "--out-dir", RLIB_CACHE, parser_src.to_str().unwrap(), "--edition", "2021"])
         .output()
         .map_err(|e| format!("failed to spawn rustc: {}", e))?;
-
     if !output.status.success() {
-        return Err(format!(
-            "verilog2rust library compilation failed:\n{}",
-            String::from_utf8_lossy(&output.stderr)
-        ));
+        return Err(format!("verilog-parser compilation failed:\n{}",
+            String::from_utf8_lossy(&output.stderr)));
+    }
+
+    let lib_src = std::path::Path::new(manifest)
+        .join("../../verilog2rust/src/lib.rs");
+    let output = Command::new("rustc")
+        .args(["--crate-type", "lib", "--crate-name", "verilog2rust",
+               "--out-dir", RLIB_CACHE,
+               "--extern", &format!("verilog_parser={}", parser_rlib),
+               "-L", RLIB_CACHE,
+               lib_src.to_str().unwrap(), "--edition", "2021"])
+        .output()
+        .map_err(|e| format!("failed to spawn rustc: {}", e))?;
+    if !output.status.success() {
+        return Err(format!("verilog2rust library compilation failed:\n{}",
+            String::from_utf8_lossy(&output.stderr)));
     }
 
     Ok(rlib_path)
@@ -67,13 +76,13 @@ fn handle_sim(code: String, top: Option<String>) -> Response {
         Err(_) => return Response::Error { error: "Verilog parsing panicked".into() },
     };
 
-    let generated_rust = match catch_unwind(|| verilog2rust::gen_rhdl(&modules)) {
+    let generated_rust = match catch_unwind(|| verilog2rust::gen_ruhdl(&modules)) {
         Ok(r) => r,
         Err(_) => return Response::Error { error: "Rust code generation panicked".into() },
     };
 
     let _ = std::fs::create_dir_all("/tmp/verilog2rust_src").map_err(|e| e.to_string());
-    let src_name = top.as_deref().unwrap_or("design");
+    let src_name = format!("design_{}", next_temp_id());
     let src_path = format!("/tmp/verilog2rust_src/{}.rs", src_name);
     if let Err(e) = std::fs::write(&src_path, &generated_rust) {
         return Response::Error { error: format!("Failed to write generated Rust: {}", e) };
@@ -88,16 +97,26 @@ fn handle_sim(code: String, top: Option<String>) -> Response {
     let out_name = format!("{}_{}", src_name, std::process::id());
     let out_path = format!("{}/{}", BIN_CACHE, out_name);
 
+    let parser_rlib = format!("{}/libverilog_parser.rlib", RLIB_CACHE);
+
     let mut cmd = Command::new("rustc");
     cmd.args([
         "--extern", &format!("verilog2rust={}", rlib_path),
+        "--extern", &format!("verilog_parser={}", parser_rlib),
         "-L", rlib_dir.to_str().unwrap(),
         &src_path,
         "-o", &out_path,
         "--edition", "2021",
     ]);
 
-    let compile_output = cmd.output().map_err(|e| format!("failed to spawn rustc: {}", e)).unwrap();
+    let compile_output = match cmd.output() {
+        Ok(out) => out,
+        Err(e) => return Response::VerilogSimResult {
+            stdout: String::new(),
+            stderr: format!("Failed to spawn rustc: {}", e),
+            generated_rust,
+        },
+    };
 
     if !compile_output.status.success() {
         let stderr = String::from_utf8_lossy(&compile_output.stderr);
@@ -109,17 +128,42 @@ fn handle_sim(code: String, top: Option<String>) -> Response {
         };
     }
 
-    let run_output = Command::new(&out_path)
+    use std::sync::mpsc;
+    let child = match Command::new(&out_path)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
-        .output();
+        .spawn()
+    {
+        Ok(c) => c,
+        Err(e) => {
+            let _ = std::fs::remove_file(&out_path);
+            return Response::VerilogSimResult {
+                stdout: String::new(),
+                stderr: format!("Failed to spawn simulation: {}\n", e),
+                generated_rust,
+            };
+        }
+    };
 
-    let (run_stdout, run_stderr) = match run_output {
-        Ok(out) => (
+    let (tx, rx) = mpsc::channel();
+    std::thread::spawn(move || {
+        let output = child.wait_with_output();
+        let _ = tx.send(output);
+    });
+
+    const TIMEOUT_SECS: u64 = 15;
+    let (run_stdout, run_stderr) = match rx.recv_timeout(std::time::Duration::from_secs(TIMEOUT_SECS)) {
+        Ok(Ok(out)) => (
             String::from_utf8_lossy(&out.stdout).to_string(),
             String::from_utf8_lossy(&out.stderr).to_string(),
         ),
-        Err(e) => (String::new(), format!("Execution failed: {}\n", e)),
+        Ok(Err(e)) => (String::new(), format!("Execution failed: {}\n", e)),
+        Err(mpsc::RecvTimeoutError::Timeout) => {
+            (String::new(), format!("Simulation timed out after {} seconds (infinite loop?)\n", TIMEOUT_SECS))
+        }
+        Err(mpsc::RecvTimeoutError::Disconnected) => {
+            (String::new(), "Simulation process crashed\n".into())
+        }
     };
 
     let _ = std::fs::remove_file(&out_path);
