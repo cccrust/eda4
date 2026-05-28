@@ -447,6 +447,8 @@ fn draw_circuit(
             }
         }
     }
+    // Port cells (port_*) in the ASC layout don't appear in net.cells,
+    // so only the routing-view overlay handles them.
 
     // Draw edges
     let stroke = Stroke::new(1.5 * zoom, Color32::from_rgba_premultiplied(137, 180, 250, 120));
@@ -691,6 +693,11 @@ fn draw_routing(
             for &b in bits {
                 net_to_cells.entry(b).or_default().push(name.clone());
             }
+        }
+    }
+    for (name, port) in &net.ports {
+        for &b in &port.bits {
+            net_to_cells.entry(b).or_default().push(format!("port_{}", name));
         }
     }
 
