@@ -8,7 +8,7 @@ pub fn write_asc(placement: &Placement, routing: &Routing, arch: &ArchGraph) -> 
     writeln!(s, ".device {}", arch_device_name(arch)).ok();
     writeln!(s).ok();
     for (name, coord) in &placement.cell_to_coord {
-        writeln!(s, ".logic_tile {} {}", coord.row, coord.col).ok();
+        writeln!(s, ".logic_tile {} {}", coord.col, coord.row).ok();
         writeln!(s, "  .sym {} 0 0 0 0 \"{}\"", coord.row * 100 + coord.col, name).ok();
     }
     writeln!(s).ok();

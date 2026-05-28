@@ -134,12 +134,12 @@ pub fn parse_asc(input: &str) -> Result<AscFile, AscError> {
                     logic_tiles.push(cfg);
                 }
                 if parts.len() >= 3 {
-                    let row: u32 = parts[1]
-                        .parse()
-                        .map_err(|e| err(lineno, format!("無效 row: {e}")))?;
-                    let col: u32 = parts[2]
+                    let col: u32 = parts[1]
                         .parse()
                         .map_err(|e| err(lineno, format!("無效 col: {e}")))?;
+                    let row: u32 = parts[2]
+                        .parse()
+                        .map_err(|e| err(lineno, format!("無效 row: {e}")))?;
                     cur_logic = Some(LogicTileConfig {
                         pos: TilePos { row, col },
                         luts: Vec::new(),
@@ -157,8 +157,8 @@ pub fn parse_asc(input: &str) -> Result<AscFile, AscError> {
                     logic_tiles.push(cfg);
                 }
                 if parts.len() >= 3 {
-                    let row: u32 = parts[1].parse().map_err(|e| err(lineno, format!("無效 row: {e}")))?;
-                    let col: u32 = parts[2].parse().map_err(|e| err(lineno, format!("無效 col: {e}")))?;
+                    let col: u32 = parts[1].parse().map_err(|e| err(lineno, format!("無效 col: {e}")))?;
+                    let row: u32 = parts[2].parse().map_err(|e| err(lineno, format!("無效 row: {e}")))?;
                     cur_io = Some(IoTileConfig {
                         pos: TilePos { row, col },
                         pads: Vec::new(),

@@ -344,21 +344,21 @@ fn parse_layout(text: &str) -> Result<Layout, String> {
             let rest = line.trim_start_matches(".logic_tile ").trim();
             let parts: Vec<&str> = rest.split_whitespace().collect();
             if parts.len() >= 2 {
-                let x: u32 = parts[0].parse().map_err(|_| format!("bad tile x: {}", parts[0]))?;
-                let y: u32 = parts[1].parse().map_err(|_| format!("bad tile y: {}", parts[1]))?;
+                let col: u32 = parts[0].parse().map_err(|_| format!("bad tile col: {}", parts[0]))?;
+                let row: u32 = parts[1].parse().map_err(|_| format!("bad tile row: {}", parts[1]))?;
                 if parts.len() >= 6 {
                     let cell_name = parts[5].trim_matches('"').to_string();
-                    tiles.push(TilePlacement { x, y, cell_name });
+                    tiles.push(TilePlacement { x: col, y: row, cell_name });
                 } else {
-                    pending = Some((x, y));
+                    pending = Some((col, row));
                 }
             }
         } else if line.starts_with(".sym") && pending.is_some() {
             let parts: Vec<&str> = line.split_whitespace().collect();
             if parts.len() >= 6 {
-                if let Some((x, y)) = pending.take() {
+                if let Some((col, row)) = pending.take() {
                     let cell_name = parts[5].trim_matches('"').to_string();
-                    tiles.push(TilePlacement { x, y, cell_name });
+                    tiles.push(TilePlacement { x: col, y: row, cell_name });
                 }
             }
         } else if line.starts_with(".wiring ") {
