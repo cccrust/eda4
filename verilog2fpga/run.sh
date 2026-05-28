@@ -26,13 +26,6 @@ echo "=== 純 Rust E2E: blinky (Verilog) ==="
 echo "  ✓ ($(wc -c < "$ROOT/_out/blinky_vlog.bin") bytes)"
 
 echo ""
-echo "=== 純 Rust E2E: blinky (Rust HDL) ==="
-"$BIN" build "$ROOT/examples/blinky/blinky.v" \
-    --device hx8k --backend pure-rust --lang rust \
-    --output "$ROOT/_out/blinky_rust"
-echo "  ✓ ($(wc -c < "$ROOT/_out/blinky_rust.bin") bytes)"
-
-echo ""
 echo "=== 純 Rust E2E: adder (Verilog) ==="
 "$BIN" build "$ROOT/examples/adder/adder.v" \
     --device hx8k --backend pure-rust \

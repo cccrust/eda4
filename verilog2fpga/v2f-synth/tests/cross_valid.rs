@@ -33,7 +33,9 @@ fn parse_module(json_str: &str, mod_name: &str) -> serde_json::Value {
 
 fn blinky_src() -> &'static str {
     r#"
-module blinky(input clk, output led);
+module blinky(clk, led);
+input clk;
+output led;
 reg [25:0] counter;
 always @(posedge clk) counter <= counter + 1;
 assign led = counter[25];
@@ -43,7 +45,11 @@ endmodule
 
 fn adder_src() -> &'static str {
     r#"
-module adder(input [3:0] a, input [3:0] b, output [3:0] sum, output carry);
+module adder(a, b, sum, carry);
+input [3:0] a;
+input [3:0] b;
+output [3:0] sum;
+output carry;
 wire [4:0] result;
 assign result = a + b;
 assign sum = result[3:0];

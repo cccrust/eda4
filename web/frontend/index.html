@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDA4 Web — Verilog & SPICE Simulator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e0e0e0; min-height: 100vh; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+  header { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #2a2a3a; margin-bottom: 1rem; }
+  header h1 { font-size: 1.5rem; color: #7dd3fc; }
+  header .badge { font-size: 0.7rem; background: #7dd3fc22; color: #7dd3fc; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  .tabs { display: flex; gap: 0.25rem; margin-bottom: 1rem; }
+  .tab { padding: 0.5rem 1rem; cursor: pointer; border: none; background: #1a1a2e; color: #888; border-radius: 6px 6px 0 0; font-size: 0.9rem; transition: all 0.15s; }
+  .tab:hover { background: #252540; color: #bbb; }
+  .tab.active { background: #1e1e32; color: #7dd3fc; border-bottom: 2px solid #7dd3fc; }
+  .panel { background: #1e1e32; border-radius: 0 8px 8px 8px; padding: 1rem; min-height: 70vh; }
+  .toolbar { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; align-items: center; }
+  select, button { padding: 0.4rem 0.8rem; border-radius: 5px; border: 1px solid #333; background: #16162a; color: #ddd; font-size: 0.85rem; cursor: pointer; }
+  select:hover, button:hover { border-color: #555; }
+  button.primary { background: #7dd3fc22; border-color: #7dd3fc; color: #7dd3fc; }
+  button.primary:hover { background: #7dd3fc33; }
+  button.danger { background: #f8717122; border-color: #f87171; color: #f87171; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 500px; }
+  .editor-pane, .output-pane { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .pane-label { font-size: 0.75rem; color: #666; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  textarea { flex: 1; width: 100%; min-height: 0; background: #12121f; border: 1px solid #2a2a3a; border-radius: 6px; color: #d4d4d4; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; padding: 0.6rem; resize: none; line-height: 1.5; overflow: auto; }
+  textarea:focus { outline: none; border-color: #444; }
+  .output { flex: 1; min-height: 0; background: #12121f; border: 1px solid #2a2a3a; border-radius: 6px; overflow: auto; padding: 0.6rem; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; white-space: pre-wrap; line-height: 1.5; color: #aaa; }
+  .output.error { color: #f87171; border-color: #f8717133; }
+  .output.success { color: #86efac; border-color: #86efac33; }
+  .output.info { color: #7dd3fc; }
+  pre { white-space: pre-wrap; word-break: break-all; }
+  .ws-status { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 3px; }
+  .ws-status.connected { background: #86efac22; color: #86efac; }
+  .ws-status.disconnected { background: #f8717122; color: #f87171; }
+  .ws-status.connecting { background: #fbbf2422; color: #fbbf24; }
+  .meta { font-size: 0.75rem; color: #555; margin-top: 0.3rem; }
+  .section-label { font-size: 0.7rem; text-transform: uppercase; color: #555; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+  .json-output { font-size: 0.75rem; color: #aaa; max-height: 300px; overflow: auto; background: #0d0d18; border-radius: 6px; padding: 0.5rem; font-family: monospace; white-space: pre; min-height: 0; }
+  @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>EDA4 Web</h1>
+    <span class="badge">Verilog 2 Rust / FPGA PnR / SPICE</span>
+    <span class="ws-status disconnected" id="wsStatus">disconnected</span>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="verilog-sim">Verilog Simulation</button>
+    <button class="tab" data-tab="verilog-pnr">Verilog PnR (FPGA)</button>
+    <button class="tab" data-tab="spice">SPICE Simulation</button>
+    <button class="tab" data-tab="bitstream">Bitstream Decode</button>
+  </div>
+
+  <!-- Verilog Simulation -->
+  <div class="panel" id="panel-verilog-sim">
+    <div class="toolbar">
+      <button class="primary" id="btn-verilog-run">Run Simulation</button>
+      <select id="verilog-examples">
+        <option value="">Load Example...</option>
+        <option value="halfadd">HalfAdder (with TB)</option>
+        <option value="fulladd">FullAdder (with TB)</option>
+        <option value="adder4">Adder4 (4-bit, with TB)</option>
+        <option value="adder8">Adder8 (8-bit, with TB)</option>
+        <option value="alu">ALU (8-bit, with TB)</option>
+        <option value="mux2">Mux2 (2-to-1, with TB)</option>
+        <option value="mux4">Mux4 (4-to-1, with TB)</option>
+        <option value="dff">D Flip-Flop (with TB)</option>
+        <option value="counter">Counter 4-bit (with TB)</option>
+        <option value="decoder">Decoder 2x4 (with TB)</option>
+        <option value="register">Register (with TB)</option>
+        <option value="fsm">FSM (Moore 3-state, with TB)</option>
+      </select>
+      <button id="btn-verilog-clear">Clear Output</button>
+      <span class="meta">Compiles via rustc and runs ruHDL simulation</span>
+    </div>
+    <div class="split">
+      <div class="editor-pane">
+        <div class="pane-label">Verilog Code</div>
+        <textarea id="verilog-code" placeholder="module halfadd(input a, input b, output sum, output cout);
+  assign sum = a ^ b;
+  assign cout = a & b;
+endmodule
+
+module halfadd_tb;
+  reg a, b;
+  wire sum, cout;
+  initial begin a=0; b=0; #1 a=1; b=0; #1 a=0; b=1; #1 a=1; b=1; #1 $finish;
+endmodule"></textarea>
+      </div>
+      <div class="output-pane">
+        <div class="pane-label">Simulation Output</div>
+        <div class="output" id="verilog-output">Ready. Paste Verilog code and click "Run Simulation".</div>
+        <div class="pane-label" style="margin-top:0.5rem">Generated Rust (ruHDL)</div>
+        <div class="json-output" id="verilog-generated"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verilog PnR -->
+  <div class="panel" id="panel-verilog-pnr" style="display:none">
+    <div class="toolbar">
+      <button class="primary" id="btn-pnr-run">Run Synthesis + PnR</button>
+      <select id="pnr-device">
+        <option value="hx8k">iCE40 HX8K</option>
+        <option value="hx4k">iCE40 HX4K</option>
+        <option value="hx1k">iCE40 HX1K</option>
+        <option value="lp1k">iCE40 LP1K</option>
+        <option value="up5k">iCE40 UP5K</option>
+      </select>
+      <select id="pnr-examples">
+        <option value="">Load Example...</option>
+        <option value="blinky">Blinky (LED counter)</option>
+        <option value="halfadd">HalfAdder</option>
+        <option value="fulladd">FullAdder</option>
+        <option value="adder4">Adder4 (4-bit ripple)</option>
+        <option value="alu">ALU (4-bit)</option>
+        <option value="mux2">Mux2 (2-to-1)</option>
+        <option value="counter8">Counter (8-bit)</option>
+        <option value="decoder">Decoder 2x4</option>
+      </select>
+      <button id="btn-pnr-clear">Clear Output</button>
+      <span class="meta">Pure Rust synthesis → place & route → bitstream</span>
+    </div>
+    <div class="split">
+      <div class="editor-pane">
+        <div class="pane-label">Verilog Code</div>
+        <textarea id="pnr-code" placeholder="module blinky(input clk, output reg led);
+  reg [25:0] counter;
+  always @(posedge clk) counter <= counter + 1;
+  assign led = counter[25];
+endmodule"></textarea>
+      </div>
+      <div class="output-pane">
+        <div class="pane-label">PnR Results</div>
+        <div class="output" id="pnr-output">Ready. Paste Verilog and click "Run Synthesis + PnR".</div>
+        <div class="pane-label" style="margin-top:0.5rem">Netlist JSON</div>
+        <div class="json-output" id="pnr-json" style="max-height:200px"></div>
+        <div class="pane-label" style="margin-top:0.5rem">ASC Place & Route</div>
+        <div class="json-output" id="pnr-asc" style="max-height:150px"></div>
+        <div class="meta" id="pnr-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPICE Simulation -->
+  <div class="panel" id="panel-spice" style="display:none">
+    <div class="toolbar">
+      <button class="primary" id="btn-spice-run">Run Analysis</button>
+      <select id="spice-analysis">
+        <option value="all">All (DC + AC + Transient)</option>
+        <option value="dc">DC Operating Point</option>
+        <option value="ac">AC Frequency Sweep</option>
+        <option value="transient">Transient</option>
+      </select>
+      <select id="spice-examples">
+        <option value="">Load Example...</option>
+        <option value="resdiv">Resistor Divider (DC)</option>
+        <option value="rc">RC Circuit (AC sweep)</option>
+        <option value="rcdiff">RC Transient (pulse diff)</option>
+        <option value="diode">Diode IV Curve</option>
+        <option value="transistor">Transistor Amplifier (AC)</option>
+        <option value="ringosc">Ring Oscillator (transient)</option>
+        <option value="wheatstone">Wheatstone Bridge (DC)</option>
+        <option value="opamp">Op-Amp Amplifier (AC)</option>
+      </select>
+      <button id="btn-spice-clear">Clear Output</button>
+    </div>
+    <div class="split">
+      <div class="editor-pane">
+        <div class="pane-label">SPICE Netlist</div>
+        <textarea id="spice-code" placeholder="* Resistor Divider
+V1 Vin gnd DC 10
+R1 Vin Vout 1k
+R2 Vout gnd 1k
+.END"></textarea>
+      </div>
+      <div class="output-pane">
+        <div class="pane-label">Analysis Results</div>
+        <div class="output" id="spice-output">Ready. Paste SPICE netlist and click "Run Analysis".</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bitstream Decode -->
+  <div class="panel" id="panel-bitstream" style="display:none">
+    <div class="toolbar">
+      <button class="primary" id="btn-decode-run">Decode Bitstream</button>
+      <select id="decode-examples">
+        <option value="">Load Example...</option>
+        <option value="blinky_hx1k">Blinky HX1K (LED counter)</option>
+        <option value="halfadd_hx1k">HalfAdder HX1K</option>
+        <option value="mux2_hx1k">Mux2 HX1K</option>
+        <option value="run_pnr_blinky">Run PnR: Blinky → Decode</option>
+        <option value="run_pnr_halfadd">Run PnR: HalfAdder → Decode</option>
+      </select>
+      <button id="btn-decode-clear">Clear Output</button>
+    </div>
+    <div class="split">
+      <div class="editor-pane">
+        <div class="pane-label">Bitstream (Base64)</div>
+        <textarea id="decode-code" placeholder="Paste base64-encoded .bin bitstream here..."></textarea>
+      </div>
+      <div class="output-pane">
+        <div class="pane-label">Decoded Result</div>
+        <div class="output" id="decode-output">Ready. Paste base64 bitstream and click "Decode".</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -22,7 +22,7 @@ mod tests {
 
     #[test]
     fn test_synth_simple_wire() {
-        let src = "module top(input a, output y); assign y = a; endmodule";
+        let src = "module top(a, y); input a; output y; assign y = a; endmodule";
         let json = synthesize(src, "top");
         let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed["creator"], "v2f-synth v0.3");
@@ -33,7 +33,9 @@ mod tests {
     #[test]
     fn test_synth_blinky() {
         let src = r#"
-module blinky(input clk, output reg led);
+module blinky(clk, led);
+input clk;
+output reg led;
 reg [25:0] counter;
 always @(posedge clk) begin
     counter <= counter + 1;
@@ -52,7 +54,11 @@ endmodule
     #[test]
     fn test_synth_adder() {
         let src = r#"
-module adder(input [3:0] a, input [3:0] b, output [3:0] sum, output carry);
+module adder(a, b, sum, carry);
+input [3:0] a;
+input [3:0] b;
+output [3:0] sum;
+output carry;
 wire [4:0] result;
 assign result = a + b;
 assign sum = result[3:0];

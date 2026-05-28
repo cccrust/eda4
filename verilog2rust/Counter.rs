@@ -24,13 +24,15 @@ impl Counter {
     }
 
     pub fn eval(&mut self) {
-    if get(&self.rst) != Level::L {
+    if get(&self.rst) as u64 != 0 {
         u16_to_bus(&self.q, (0 & 255u64) as u16);
     } else {
-        if get(&self.en) != Level::L {
+        if get(&self.en) as u64 != 0 {
             u16_to_bus(&self.q, ((bus_to_u16(&self.q) as u64 + 1) & 255u64 & 255u64) as u16);
         }
     }
+    }
+    pub fn run(&mut self) {
     }
 }
 

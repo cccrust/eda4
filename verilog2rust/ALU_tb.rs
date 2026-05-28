@@ -42,6 +42,8 @@ impl ALU {
     }
     if get(&self.zero) != if (bus_to_u16(&self.result) as u64) == (0) { Level::H } else { Level::L } { set(&self.zero, if (bus_to_u16(&self.result) as u64) == (0) { Level::H } else { Level::L }); }
     }
+    pub fn run(&mut self) {
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -76,6 +78,7 @@ impl ALUTb {
         self.dut.eval();
     }
     pub fn run(&mut self) {
+        self.dut.run();
         println!("=== ALU Testbench ===");
         println!(" op |   a    b  | result  zero");
         println!("----+----------+---------");

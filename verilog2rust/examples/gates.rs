@@ -9,9 +9,9 @@ fn main() {
     let y_or = wire("y_or");
     let y_xor = wire("y_xor");
 
-    let mut and = And::new(a.clone(), b.clone(), y_and.clone());
-    let mut or = Or::new(a.clone(), b.clone(), y_or.clone());
-    let mut xor = Xor::new(a.clone(), b.clone(), y_xor.clone());
+    let mut and = And::new(vec![a.clone(), b.clone()], y_and.clone());
+    let mut or = Or::new(vec![a.clone(), b.clone()], y_or.clone());
+    let mut xor = Xor::new(vec![a.clone(), b.clone()], y_xor.clone());
 
     println!(" a b | AND OR XOR");
     println!("-----+-----------");

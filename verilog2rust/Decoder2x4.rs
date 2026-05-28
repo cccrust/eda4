@@ -21,7 +21,7 @@ impl Decoder2x4 {
     }
 
     pub fn eval(&mut self) {
-    if get(&self.en).not() != Level::L {
+    if if get(&self.en) as u64 == 0 { 1 } else { 0 } != 0 {
         u16_to_bus(&self.y, (0 & 15u64) as u16);
     } else {
         let __case_val = bus_to_u16(&self.a) as u64;
@@ -38,6 +38,8 @@ impl Decoder2x4 {
             u16_to_bus(&self.y, (8 & 15u64) as u16);
         }
     }
+    }
+    pub fn run(&mut self) {
     }
 }
 

@@ -22,14 +22,16 @@ impl HalfAdder {
             b: b.clone(),
             sum: sum.clone(),
             carry: carry.clone(),
-            u1: Xor::new(a.clone(), b.clone(), sum.clone()),
-            u2: And::new(a.clone(), b.clone(), carry.clone()),
+            u1: Xor::new(vec![a.clone(), b.clone()], sum.clone()),
+            u2: And::new(vec![a.clone(), b.clone()], carry.clone()),
         }
     }
 
     pub fn eval(&mut self) {
         self.u1.eval();
         self.u2.eval();
+    }
+    pub fn run(&mut self) {
     }
 }
 

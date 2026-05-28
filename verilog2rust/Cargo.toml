@@ -2,3 +2,6 @@
 name = "verilog2rust"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+verilog-parser = { path = "../verilog-parser" }

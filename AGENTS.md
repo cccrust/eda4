@@ -5,18 +5,22 @@ Rust EDA monorepo with two sub-projects: **verilog2fpga** (FPGA toolchain) and *
 ## Directory layout
 
 ```
-verilog2fpga/     Rust workspace (10 crates)
+verilog2fpga/     Rust workspace (11 crates)
   v2f-core/        Shared: Device enum (HX1K/HX4K/HX8K/LP1K/UP5K), Config, V2fError
   v2f-cli/         Binary crate `v2f` — clap CLI (build/synth/pnr/pack/prog/list-devices/check)
   v2f-synth/       Pure-Rust Verilog synthesis (parser → techmap → netlist → JSON)
-  v2f-pnr/         Pure-Rust place & route (simmulated annealing)
+  v2f-pnr/         Pure-Rust place & route (simulated annealing)
   v2f-bitstream/   ASC → CRAM → BIN bitstream packing (fixtures: _fixtures/*.asc)
+  v2f-bitdecode/   BIN → JSON decoder (v2f-bitdecode-v2 format, wiring decode level)
   v2f-programmer/  FPGA programmer (mock JTAG/SPI, optional `ftdi` feature for real hardware)
   v2f-rust/        Rust HDL (`fpga!` macro) → JSON compile → Verilog backend
   v2f-rust-macros/ proc-macro crate for the `fpga!` DSL
   v2f-db/          iCE40 device database (tile/CRAM address maps)
   v2f-viz/         eframe GUI binary `v2f-viz` for visualizing JSON+ASC
   examples/        blinky (v/pcf), adder (v)
+verilog-parser/   Shared Verilog parser crate (standalone, used by v2f-synth)
+  src/parse.rs     Tokenizer + parser
+  src/ast.rs       AST types (Module, Port, Expr, Stmt, etc.)
 verilog2rust/     Single crate: binary + library
   src/verilog/     Verilog tokenizer/parser/AST → code generator
   src/rhdl/        Simulation runtime (Signal, Gate trait, sim harness)
@@ -65,10 +69,15 @@ brew install nextpnr-ice40  # or: brew tap siliconwitchery/oss-fpga && brew inst
 
 Only needed for `--backend yosys` / `icepack` / physical FPGA programming.
 
+### ruspice
+
+Analog circuit simulator — separate crate with its own `ruspice/AGENTS.md`.
+
 ## Architecture notes
 
 - **verilog2fpga** uses a pure-Rust EDA pipeline as default (synth → PNR → bitstream). External yosys/nextpnr/icepack are optional. Pipeline: `.v` → `v2f-synth` (JSON netlist) → `v2f-pnr` (ASC) → `v2f-bitstream` (BIN) → `v2f-programmer` (JEDEC/SPI).
-- **verilog2rust** parses Verilog, generates Rust code using the rhdl runtime (Signal + Gate trait), and can execute via rustc compilation. The library crate is compiled once to `/tmp/verilog2rust_rlib/` and cached; `.rhdl` files are compiled as separate binaries.
+- **verilog2rust** parses Verilog, generates Rust code using the rhdl runtime (Signal + Gate trait), and can execute via rustc compilation. The library crate is compiled as an rlib (cached via `OnceLock` in tests); `.rhdl` files are compiled as separate binaries.
+- **verilog-parser** is the shared standalone Verilog parser crate, used by v2f-synth. verilog2rust maintains its own independent copy of the same parser types in `src/verilog/ast.rs` and `src/verilog/parse.rs`.
 - **Device support**: iCE40 HX1K, HX4K, HX8K, LP1K, UP5K. Device string is case-insensitive.
 - **Bitstream packing** reads `.asc` (ASCII place-and-route output) and produces `.bin` (bitstream). Fixtures are in `v2f-bitstream/_fixtures/`.
 - **Output directory**: `_out/` (gitignored), created by `run.sh`.

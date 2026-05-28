@@ -37,11 +37,11 @@ impl FullAdder {
             s: s.clone(),
             c1: c1.clone(),
             c2: c2.clone(),
-            u1: Xor::new(a.clone(), b.clone(), s.clone()),
-            u2: Xor::new(s.clone(), cin.clone(), sum.clone()),
-            u3: And::new(a.clone(), b.clone(), c1.clone()),
-            u4: And::new(s.clone(), cin.clone(), c2.clone()),
-            u5: Or::new(c1.clone(), c2.clone(), cout.clone()),
+            u1: Xor::new(vec![a.clone(), b.clone()], s.clone()),
+            u2: Xor::new(vec![s.clone(), cin.clone()], sum.clone()),
+            u3: And::new(vec![a.clone(), b.clone()], c1.clone()),
+            u4: And::new(vec![s.clone(), cin.clone()], c2.clone()),
+            u5: Or::new(vec![c1.clone(), c2.clone()], cout.clone()),
         }
     }
 
@@ -51,6 +51,8 @@ impl FullAdder {
         self.u3.eval();
         self.u4.eval();
         self.u5.eval();
+    }
+    pub fn run(&mut self) {
     }
 }
 
@@ -97,6 +99,12 @@ impl Adder4 {
         self.fa2.eval();
         self.fa3.eval();
     }
+    pub fn run(&mut self) {
+        self.fa0.run();
+        self.fa1.run();
+        self.fa2.run();
+        self.fa3.run();
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -131,6 +139,7 @@ impl Adder4Tb {
         self.dut.eval();
     }
     pub fn run(&mut self) {
+        self.dut.run();
         println!("=== Adder4 Testbench ===");
         u16_to_bus(&self.a, (3 & 15u64) as u16);
         u16_to_bus(&self.b, (5 & 15u64) as u16);

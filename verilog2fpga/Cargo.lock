@@ -3395,7 +3395,6 @@ dependencies = [
  "v2f-db",
  "v2f-pnr",
  "v2f-programmer",
- "v2f-rust",
  "v2f-synth",
 ]
 
@@ -3448,30 +3447,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "v2f-rust"
-version = "0.5.0"
-dependencies = [
- "serde",
- "serde_json",
- "v2f-core",
- "v2f-rust-macros",
-]
-
-[[package]]
-name = "v2f-rust-macros"
-version = "0.5.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.117",
-]
-
-[[package]]
 name = "v2f-synth"
 version = "0.3.0"
 dependencies = [
  "serde",
  "serde_json",
+ "verilog-parser",
 ]
 
 [[package]]
@@ -3483,6 +3464,10 @@ dependencies = [
  "serde",
  "serde_json",
 ]
+
+[[package]]
+name = "verilog-parser"
+version = "0.1.0"
 
 [[package]]
 name = "version_check"

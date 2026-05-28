@@ -1,6 +1,6 @@
 # 系統架構
 
-verilog2fpga 是一個 Rust workspace，包含 11 個 crate。以下是各 crate 的職責與依賴關係。
+verilog2fpga 是一個 Rust workspace，包含 9 個 crate。以下是各 crate 的職責與依賴關係。
 
 ## Crate 依賴圖
 
@@ -12,9 +12,6 @@ v2f-synth         ← 依賴 v2f-core（Verilog → JSON 網表）
 v2f-bitstream     ← 依賴 v2f-db（CRAM 管理、frame、打包）
      ↓                  ↓
 v2f-pnr           ← 依賴 v2f-core、v2f-db、v2f-synth（PNR → ASC）
-v2f-rust          ← 依賴 v2f-synth（Rust HDL → JSON）
-     ↓
-v2f-rust-macros   ← 依賴 v2f-rust（fpga! 巨集）
 v2f-cli           ← 依賴幾乎全部（統一 CLI）
      ↓
 v2f-bitdecode     ← 依賴 v2f-bitstream、v2f-db（BIN → JSON 解碼）
@@ -76,9 +73,6 @@ CRAM 管理與位元流打包。包含：
 ### v2f-cli
 統一 CLI 入口。實作 9 個子命令：
 `build` / `synth` / `pnr` / `pack` / `prog` / `list-devices` / `check`
-
-### v2f-rust / v2f-rust-macros
-Rust HDL DSL。`fpga!` 巨集允許用 Rust 語法描述硬體電路，編譯後輸出與 `v2f-synth` 相同的 JSON 格式。
 
 ### v2f-viz
 基於 `eframe` 的 GUI 工具。可視化 JSON 網表和 ASC 檔案。

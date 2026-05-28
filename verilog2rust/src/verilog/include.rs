@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use crate::verilog::parse::parse_verilog;
-use crate::verilog::ast::Module;
+use verilog_parser::parse::parse_verilog;
+use verilog_parser::ast::Module;
 
 pub fn parse_file(path: &str) -> Vec<Module> {
     let source = fs::read_to_string(path).expect(&format!("Failed to read file: {}", path));

@@ -62,10 +62,6 @@ v2f build <input.v> [options]
 ./target/debug/v2f build examples/blinky/blinky.v \
     --backend yosys --device hx8k --top blinky \
     --output _out/blinky_yosys
-
-# Rust HDL DSL
-./target/debug/v2f build examples/blinky/blinky.v \
-    --lang rust --backend pure-rust --output _out/blinky_rust
 ```
 
 ---
@@ -180,7 +176,6 @@ v2f prog <input.bin> [options]
   ✓ v2f-pnr (pure Rust): 已啟用
   ✓ v2f-bitstream (pure Rust): 已啟用
   ✓ v2f-bitdecode (pure Rust): 已啟用
-  ✓ v2f-rust (HDL bridge): 已啟用
 ```
 
 ---

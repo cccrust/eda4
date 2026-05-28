@@ -43,5 +43,11 @@ impl Adder4 {
         self.fa2.eval();
         self.fa3.eval();
     }
+    pub fn run(&mut self) {
+        self.fa0.run();
+        self.fa1.run();
+        self.fa2.run();
+        self.fa3.run();
+    }
 }
 

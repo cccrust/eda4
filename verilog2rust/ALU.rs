@@ -42,5 +42,7 @@ impl ALU {
     }
     if get(&self.zero) != if (bus_to_u16(&self.result) as u64) == (0) { Level::H } else { Level::L } { set(&self.zero, if (bus_to_u16(&self.result) as u64) == (0) { Level::H } else { Level::L }); }
     }
+    pub fn run(&mut self) {
+    }
 }
 

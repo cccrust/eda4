@@ -36,10 +36,10 @@ impl Mux2 {
             not_sel: not_sel.clone(),
             t1: t1.clone(),
             t2: t2.clone(),
-            u1: Not::new(sel.clone(), not_sel.clone()),
-            u2: And::new(a.clone(), not_sel.clone(), t1.clone()),
-            u3: And::new(b.clone(), sel.clone(), t2.clone()),
-            u4: Or::new(t1.clone(), t2.clone(), y.clone()),
+            u1: Not::new(vec![sel.clone()], not_sel.clone()),
+            u2: And::new(vec![a.clone(), not_sel.clone()], t1.clone()),
+            u3: And::new(vec![b.clone(), sel.clone()], t2.clone()),
+            u4: Or::new(vec![t1.clone(), t2.clone()], y.clone()),
         }
     }
 
@@ -48,6 +48,8 @@ impl Mux2 {
         self.u2.eval();
         self.u3.eval();
         self.u4.eval();
+    }
+    pub fn run(&mut self) {
     }
 }
 

@@ -1,5 +1,285 @@
 use verilog2rust::{parse_verilog, gen_ruhdl};
-use verilog2rust::verilog::ast::*;
+use verilog_parser::ast::*;
+use std::process::{Command, Stdio};
+use std::fs;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static COUNTER: AtomicU64 = AtomicU64::new(0);
+
+fn sim(code: &str) -> Result<String, String> {
+    let rlib_path = format!("{}/target/debug/libverilog2rust.rlib", env!("CARGO_MANIFEST_DIR"));
+    let rlib_dir = format!("{}/target/debug", env!("CARGO_MANIFEST_DIR"));
+    let deps_dir = format!("{}/target/debug/deps", env!("CARGO_MANIFEST_DIR"));
+    let modules = parse_verilog(code);
+    let rust_code = gen_ruhdl(&modules);
+    let id = COUNTER.fetch_add(1, Ordering::Relaxed);
+    let src = std::path::Path::new("/tmp").join(format!("v2r_{}.rs", id));
+    let out_bin = std::path::Path::new("/tmp").join(format!("v2r_{}", id));
+    fs::write(&src, &rust_code).map_err(|e| e.to_string())?;
+    let status = Command::new("rustc")
+        .args(["--extern", &format!("verilog2rust={}", rlib_path),
+               "-L", &rlib_dir, "-L", &deps_dir, src.to_str().unwrap(), "-o", out_bin.to_str().unwrap(), "--edition", "2021"])
+        .stdout(Stdio::piped()).stderr(Stdio::piped())
+        .status().map_err(|e| e.to_string())?;
+    if !status.success() {
+        let src_err = fs::read_to_string(&src).unwrap_or_default();
+        let stderr = String::from_utf8_lossy(&{
+            Command::new("rustc")
+                .args(["--extern", &format!("verilog2rust={}", rlib_path),
+                       "-L", &rlib_dir, "-L", &deps_dir, src.to_str().unwrap(), "-o", out_bin.to_str().unwrap(), "--edition", "2021"])
+                .output().expect("rustc failed").stderr
+        }).to_string();
+        return Err(format!("compile failed:\n=== SRC ===\n{}\n=== STDERR ===\n{}", src_err, stderr));
+    }
+    let output = Command::new(&out_bin).output().map_err(|e| e.to_string())?;
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+}
+
+macro_rules! sim_test {
+    ($name:ident, $code:expr, $check:expr) => {
+        #[test]
+        fn $name() {
+            let out = sim($code).unwrap_or_else(|e| panic!("sim failed: {}", e));
+            assert!(out.contains($check), "output should contain '{}', got: {}", $check, out);
+        }
+    };
+}
+
+#[test]
+fn test_sim_fulladder() {
+    let code = r#"module FullAdder(a, b, cin, sum, cout);
+  input a, b, cin; output sum, cout;
+  wire s, c1, c2;
+  xor u1(s, a, b); xor u2(sum, s, cin);
+  and u3(c1, a, b); and u4(c2, s, cin); or u5(cout, c1, c2);
+endmodule
+module tb;
+  reg a, b, cin; wire sum, cout;
+  FullAdder uut(a, b, cin, sum, cout);
+  initial begin $display("=== FullAdder ==="); a=0; b=0; cin=0; #1 $display("a=%b b=%b cin=%b sum=%b cout=%b",a,b,cin,sum,cout); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("FullAdder"));
+}
+
+#[test]
+fn test_sim_adder4() {
+    let code = r#"module FullAdder(a, b, cin, sum, cout);
+  input a, b, cin; output sum, cout;
+  wire s, c1, c2;
+  xor u1(s, a, b); xor u2(sum, s, cin);
+  and u3(c1, a, b); and u4(c2, s, cin); or u5(cout, c1, c2);
+endmodule
+module Adder4(a, b, cin, sum, cout);
+  input [3:0] a, b; input cin; output [3:0] sum; output cout;
+  wire [3:0] c;
+  FullAdder fa0(a[0],b[0],cin,sum[0],c[0]);
+  FullAdder fa1(a[1],b[1],c[0],sum[1],c[1]);
+  FullAdder fa2(a[2],b[2],c[1],sum[2],c[2]);
+  FullAdder fa3(a[3],b[3],c[2],sum[3],cout);
+endmodule
+module tb;
+  reg [3:0] a, b; reg cin; wire [3:0] sum; wire cout;
+  Adder4 uut(a, b, cin, sum, cout);
+  initial begin $display("=== Adder4 ==="); a=1; b=2; cin=0; #1 $display("sum=%h cout=%b",sum,cout); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Adder4"));
+    assert!(out.contains("sum="));
+}
+
+#[test]
+fn test_sim_alu() {
+    let code = r#"module ALU(a, b, op, result);
+  input [7:0] a, b; input [2:0] op; output reg [7:0] result;
+  always @(posedge clk) begin
+    case (op) 0: result <= a + b; 1: result <= a - b; 2: result <= a & b; 3: result <= a | b; default: result <= 0; endcase
+  end
+endmodule
+module tb;
+  reg [7:0] a, b; reg [2:0] op; reg clk; wire [7:0] result;
+  ALU uut(a, b, op, result);
+  initial begin $display("=== ALU ===");
+    clk=0; a=10; b=5; op=0;
+    clk=1; #1 $display("result=%d",result);
+    clk=0; op=2; clk=1; #1 $display("result=%d",result);
+    $finish;
+  end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("ALU"));
+    assert!(out.contains("result="));
+}
+
+#[test]
+fn test_sim_mux2() {
+    let code = r#"module Mux2(a, b, sel, y);
+  input a, b, sel; output y;
+  wire not_sel, t1, t2;
+  not u1(not_sel, sel); and u2(t1, a, not_sel); and u3(t2, b, sel); or u4(y, t1, t2);
+endmodule
+module tb;
+  reg a, b, sel; wire y;
+  Mux2 uut(a, b, sel, y);
+  initial begin $display("=== Mux2 ==="); sel=0; a=1; b=0; #1 $display("y=%b",y); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Mux2"));
+    assert!(out.contains("y="));
+}
+
+#[test]
+fn test_sim_mux4() {
+    let code = r#"module Mux4(a, b, c, d, sel, y);
+  input a, b, c, d; input [1:0] sel; output y;
+  wire t1, t2, t3, t4;
+  and u1(t1, a, ~sel[1], ~sel[0]); and u2(t2, b, ~sel[1], sel[0]);
+  and u3(t3, c, sel[1], ~sel[0]); and u4(t4, d, sel[1], sel[0]);
+  or u5(y, t1, t2, t3, t4);
+endmodule
+module tb;
+  reg a, b, c, d; reg [1:0] sel; wire y;
+  Mux4 uut(a, b, c, d, sel, y);
+  initial begin $display("=== Mux4 ==="); a=1; b=0; c=0; d=0; sel=0; #1 $display("y=%b",y); sel=1; #1 $display("y=%b",y); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Mux4"));
+    assert!(out.contains("y="));
+}
+
+#[test]
+fn test_sim_dff() {
+    let code = r#"module DFF(d, clk, q);
+  input d, clk; output reg q;
+  always @(posedge clk) q <= d;
+endmodule
+module tb;
+  reg d, clk; wire q;
+  DFF uut(d, clk, q);
+  initial begin $display("=== DFF ===");
+    clk=0; d=0; $display("q=%b",q);
+    clk=1; #1 $display("q=%b",q);
+    clk=0; d=1; #1 clk=1; #1 $display("q=%b",q);
+    $finish;
+  end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("DFF"));
+    assert!(out.contains("q="));
+}
+
+#[test]
+fn test_sim_counter() {
+    let code = r#"module Counter(clk, rst, count);
+  input clk, rst; output [3:0] count; reg [3:0] count;
+  always @(posedge clk) begin if (rst) count <= 0; else count <= count + 1; end
+endmodule
+module tb;
+  reg clk, rst; wire [3:0] count;
+  Counter uut(clk, rst, count);
+  initial begin $display("=== Counter ===");
+    clk=0; rst=1; $display("count=%h",count);
+    clk=1; #1 rst=0;
+    clk=0; #1 $display("count=%h",count);
+    clk=1; #1 $display("count=%h",count);
+    $finish;
+  end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Counter"));
+    assert!(out.contains("count="));
+}
+
+#[test]
+fn test_sim_decoder() {
+    let code = r#"module Decoder2x4(enable, idx, out);
+  input enable; input [1:0] idx; output [3:0] out;
+  wire [1:0] not_idx;
+  not u0(not_idx[0], idx[0]); not u1(not_idx[1], idx[1]);
+  and u2(out[0], enable, not_idx[1], not_idx[0]);
+  and u3(out[1], enable, not_idx[1], idx[0]);
+  and u4(out[2], enable, idx[1], not_idx[0]);
+  and u5(out[3], enable, idx[1], idx[0]);
+endmodule
+module tb;
+  reg enable; reg [1:0] idx; wire [3:0] out;
+  Decoder2x4 uut(enable, idx, out);
+  initial begin $display("=== Decoder ==="); enable=1; idx=0; #1 $display("out=%b%b%b%b",out[3],out[2],out[1],out[0]); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Decoder"));
+    assert!(out.contains("out="));
+}
+
+#[test]
+fn test_sim_adder8() {
+    let code = r#"module FullAdder(a, b, cin, sum, cout);
+  input a, b, cin; output sum, cout;
+  wire s, c1, c2;
+  xor u1(s, a, b); xor u2(sum, s, cin);
+  and u3(c1, a, b); and u4(c2, s, cin); or u5(cout, c1, c2);
+endmodule
+module Adder4(a, b, cin, sum, cout);
+  input [3:0] a, b; input cin; output [3:0] sum; output cout;
+  wire [3:0] c;
+  FullAdder fa0(a[0],b[0],cin,sum[0],c[0]);
+  FullAdder fa1(a[1],b[1],c[0],sum[1],c[1]);
+  FullAdder fa2(a[2],b[2],c[1],sum[2],c[2]);
+  FullAdder fa3(a[3],b[3],c[2],sum[3],cout);
+endmodule
+module Adder8(a, b, cin, sum, cout);
+  input [7:0] a, b; input cin; output [7:0] sum; output cout;
+  wire c4;
+  Adder4 low(a[3:0],b[3:0],cin,sum[3:0],c4);
+  Adder4 high(a[7:4],b[7:4],c4,sum[7:4],cout);
+endmodule
+module tb;
+  reg [7:0] a, b; reg cin; wire [7:0] sum; wire cout;
+  Adder8 uut(a, b, cin, sum, cout);
+  initial begin $display("=== Adder8 ==="); a=8'h55; b=8'h2A; cin=0; #1 $display("sum=%h",sum); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Adder8"));
+    assert!(out.contains("sum="));
+}
+
+#[test]
+fn test_sim_register() {
+    let code = r#"module Register(clk, d, q);
+  input clk, d; output reg q;
+  always @(posedge clk) q <= d;
+endmodule
+module tb;
+  reg clk, d; wire q;
+  Register uut(clk, d, q);
+  initial begin $display("=== Register ==="); clk=0; d=0; $display("q=%b",q); clk=1; #1 $display("q=%b",q); clk=0; d=1; #1 clk=1; #1 $display("q=%b",q); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("Register"));
+    assert!(out.contains("q="));
+}
+
+#[test]
+fn test_sim_fsm() {
+    let code = r#"module FSM(clk, rst, inp, out);
+  input clk, rst, inp; output reg [1:0] out; reg [1:0] state;
+  always @(posedge clk) begin
+    if (rst) state <= 0;
+    else if (state == 0) begin if (inp) state <= 1; else state <= 0; end
+    else if (state == 1) begin if (inp) state <= 2; else state <= 0; end
+    else state <= 0;
+  end
+  always @(*) begin if (state == 0) out = 1; else if (state == 1) out = 2; else out = 3; end
+endmodule
+module tb;
+  reg clk, rst, inp; wire [1:0] out;
+  FSM uut(clk, rst, inp, out);
+  initial begin $display("=== FSM ==="); clk=0; rst=1; inp=0; $display("out=%b",out); clk=1; #1 rst=0; $display("out=%b",out); inp=1; clk=0; #1 clk=1; $display("out=%b",out); $finish; end
+endmodule"#;
+    let out = sim(code).unwrap();
+    assert!(out.contains("FSM"));
+    assert!(out.contains("out="));
+}
 
 #[test]
 fn test_tokenize_simple() {
@@ -172,10 +452,10 @@ endmodule";
     let modules = parse_verilog(input);
     let code = gen_ruhdl(&modules);
     assert!(code.contains("pub struct FullAdder"));
-    assert!(code.contains("Xor::new(a.clone(), b.clone(), s.clone())"));
-    assert!(code.contains("Xor::new(s.clone(), cin.clone(), sum.clone())"));
-    assert!(code.contains("And::new(a.clone(), b.clone(), c1.clone())"));
-    assert!(code.contains("Or::new(c1.clone(), c2.clone(), cout.clone())"));
+    assert!(code.contains("Xor::new(vec![a.clone(), b.clone()], s.clone())"));
+    assert!(code.contains("Xor::new(vec![s.clone(), cin.clone()], sum.clone())"));
+    assert!(code.contains("And::new(vec![a.clone(), b.clone()], c1.clone())"));
+    assert!(code.contains("Or::new(vec![c1.clone(), c2.clone()], cout.clone())"));
 }
 
 #[test]
@@ -193,9 +473,9 @@ module Mux2(a, b, sel, y);
 endmodule";
     let modules = parse_verilog(input);
     let code = gen_ruhdl(&modules);
-    assert!(code.contains("Not::new(sel.clone(), not_sel.clone())"));
-    assert!(code.contains("And::new(a.clone(), not_sel.clone(), t1.clone())"));
-    assert!(code.contains("Or::new(t1.clone(), t2.clone(), y.clone())"));
+    assert!(code.contains("Not::new(vec![sel.clone()], not_sel.clone())"));
+    assert!(code.contains("And::new(vec![a.clone(), not_sel.clone()], t1.clone())"));
+    assert!(code.contains("Or::new(vec![t1.clone(), t2.clone()], y.clone())"));
 }
 
 #[test]

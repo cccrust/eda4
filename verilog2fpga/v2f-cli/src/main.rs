@@ -100,24 +100,6 @@ fn main() -> V2fResult<()> {
             let bin_path = PathBuf::from(format!("{}.bin", output));
 
             match lang.as_str() {
-                "rust" => {
-                    let module = v2f_rust::fpga! {
-                        module Blinky {
-                            input clk: 1,
-                            output led: 1,
-                            reg [25:0] counter,
-                            always(posedge clk) {
-                                counter <= counter + 1;
-                            }
-                            assign led = counter[25];
-                        }
-                    };
-                    let json = v2f_rust::compile(&module);
-                    fs::write(&json_path, &json)
-                        .map_err(|e| v2f_core::V2fError::Io(e))?;
-                    pure_pnr(&json_path, &asc_path, dev)?;
-                    pack::run_pack_pure(&asc_path, &bin_path, dev)?;
-                }
                 _ => {
                     match backend.as_str() {
                         "yosys" | "auto" => {
@@ -274,7 +256,7 @@ fn main() -> V2fResult<()> {
             }
         }
         Command::Check => {
-            let checks: [(&str, bool); 9] = [
+            let checks: [(&str, bool); 8] = [
                 ("yosys", yosys_synth::check_tool()),
                 ("nextpnr-ice40", pnr::check_tool()),
                 ("icepack", pack::check_tool()),
@@ -282,7 +264,6 @@ fn main() -> V2fResult<()> {
                 ("v2f-synth (pure Rust)", true),
                 ("v2f-pnr (pure Rust)", true),
                 ("v2f-programmer (mock)", true),
-                ("v2f-rust (HDL bridge)", true),
                 ("v2f-bitstream (pure Rust)", true),
             ];
             for (name, ok) in &checks {

@@ -1,6 +1,17 @@
-use crate::verilog::ast::*;
-use crate::verilog::parse::eval_const;
+use verilog_parser::ast::*;
+use verilog_parser::parse::eval_const;
 use std::collections::{HashMap, HashSet};
+
+fn clone_vec_elements(s: &str) -> String {
+    if s.starts_with("vec![") && s.ends_with("]") {
+        let inner = &s[5..s.len()-1];
+        let elements: Vec<&str> = inner.split(',').collect();
+        let cloned: Vec<String> = elements.iter().map(|e| format!("{}.clone()", e.trim())).collect();
+        format!("vec![{}]", cloned.join(", "))
+    } else {
+        format!("{}.clone()", s)
+    }
+}
 
 pub fn gen_module(m: &Module) -> String {
     let mut out = String::new();
@@ -159,11 +170,12 @@ pub fn gen_module(m: &Module) -> String {
     for g in &gate_insts {
         let rust_gate = verilog_gate_to_rust(&g.gate_type);
         let fname = if g.instance_name.is_empty() { format!("gate_{}", to_snake(&g.gate_type)) } else { to_snake(&g.instance_name) };
-        let args: Vec<String> = g.inputs.iter().chain(g.outputs.iter()).map(|e| {
+        let inputs: Vec<String> = g.inputs.iter().map(|e| {
             let v = expr_to_var(e, &sizes);
             format!("{}.clone()", v)
         }).collect();
-        out.push_str(&format!("            {}: {}::new({}),\n", fname, rust_gate, args.join(", ")));
+        let output = expr_to_var(&g.outputs[0], &sizes);
+        out.push_str(&format!("            {}: {}::new(vec![{}], {}.clone()),\n", fname, rust_gate, inputs.join(", "), output));
     }
 
     // init sub-modules
@@ -174,12 +186,7 @@ pub fn gen_module(m: &Module) -> String {
             match c {
                 Conn::ByOrder(e) | Conn::ByName { wire: e, .. } => {
                     let v = expr_to_var(e, &sizes);
-                    let w = expr_width(e, &sizes, &decls, &m.params);
-                    if w > 1 {
-                        format!("{}.clone()", v)
-                    } else {
-                        format!("{}.clone()", v)
-                    }
+                    clone_vec_elements(&v)
                 }
             }
         }).collect();
@@ -411,7 +418,7 @@ fn gen_stmt(out: &mut String, s: &Stmt, sizes: &SizeMap, decls: &DeclMap, params
 }
 
 fn gen_expr_to_set(lhs: &Expr, rhs: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<String,u64>, indent: usize, _prefix: &str) -> String {
-    use crate::verilog::parse::eval_const;
+    use verilog_parser::parse::eval_const;
     let ind = " ".repeat(indent);
     match lhs {
         Expr::Ident(name) => {
@@ -856,6 +863,9 @@ fn expr_to_var(expr: &Expr, _sizes: &SizeMap) -> String {
             } else {
                 String::new()
             }
+        }
+        Expr::Unary { op: UnaryOp::BitNot, expr: inner } => {
+            expr_to_var(inner, _sizes)
         }
         _ => String::new(),
     }

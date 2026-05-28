@@ -3,5 +3,12 @@
 version = 4
 
 [[package]]
+name = "verilog-parser"
+version = "0.1.0"
+
+[[package]]
 name = "verilog2rust"
 version = "0.1.0"
+dependencies = [
+ "verilog-parser",
+]

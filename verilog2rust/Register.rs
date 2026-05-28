@@ -24,9 +24,11 @@ impl Register {
     }
 
     pub fn eval(&mut self) {
-    if get(&self.load) != Level::L {
+    if get(&self.load) as u64 != 0 {
         u16_to_bus(&self.q, (bus_to_u16(&self.d) as u64 & 15u64) as u16);
     }
+    }
+    pub fn run(&mut self) {
     }
 }
 

@@ -23,5 +23,7 @@ impl DFF {
     pub fn eval(&mut self) {
     if get(&self.q) != get(&self.d) { set(&self.q, get(&self.d)); }
     }
+    pub fn run(&mut self) {
+    }
 }
 

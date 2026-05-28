@@ -101,7 +101,7 @@ mod tests {
     fn test_sim_comb() {
         let mut sim = Sim::new();
         let a = wire("a"); let b = wire("b"); let y = wire("y");
-        let mut gate = And::new(a.clone(), b.clone(), y.clone());
+        let mut gate = And::new(vec![a.clone(), b.clone()], y.clone());
         sim.add_comb(move || gate.eval());
 
         set(&a, Level::H); set(&b, Level::H);
@@ -117,11 +117,11 @@ mod tests {
         let s = wire("s");
         let c1 = wire("c1"); let c2 = wire("c2"); let cout = wire("cout");
 
-        let mut x1 = Xor::new(a.clone(), b.clone(), xor_ab.clone());
-        let mut x2 = Xor::new(xor_ab.clone(), cin.clone(), s.clone());
-        let mut a1 = And::new(a.clone(), b.clone(), c1.clone());
-        let mut a2 = And::new(xor_ab.clone(), cin.clone(), c2.clone());
-        let mut o1 = Or::new(c1.clone(), c2.clone(), cout.clone());
+        let mut x1 = Xor::new(vec![a.clone(), b.clone()], xor_ab.clone());
+        let mut x2 = Xor::new(vec![xor_ab.clone(), cin.clone()], s.clone());
+        let mut a1 = And::new(vec![a.clone(), b.clone()], c1.clone());
+        let mut a2 = And::new(vec![xor_ab.clone(), cin.clone()], c2.clone());
+        let mut o1 = Or::new(vec![c1.clone(), c2.clone()], cout.clone());
 
         sim.add_comb(move || { x1.eval(); x2.eval(); a1.eval(); a2.eval(); o1.eval(); });
 
@@ -141,8 +141,8 @@ mod tests {
         let mut sim = Sim::new();
         let a = wire("a"); let b = wire("b");
         let not_a = wire("not_a");
-        let mut n1 = Not::new(a.clone(), not_a.clone());
-        let mut n2 = Not::new(not_a.clone(), b.clone());
+        let mut n1 = Not::new(vec![a.clone()], not_a.clone());
+        let mut n2 = Not::new(vec![not_a.clone()], b.clone());
         sim.add_comb(move || { n1.eval(); n2.eval(); });
 
         set(&a, Level::H);

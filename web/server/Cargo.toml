@@ -1,0 +1,34 @@
+[package]
+name = "eda4-web-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+actix-rt = "2"
+actix-ws = "0.3"
+actix-files = "0.6"
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+futures-util = "0.3"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+verilog2rust = { path = "../../verilog2rust" }
+v2f-synth = { path = "../../verilog2fpga/v2f-synth" }
+v2f-pnr = { path = "../../verilog2fpga/v2f-pnr" }
+v2f-bitstream = { path = "../../verilog2fpga/v2f-bitstream" }
+v2f-bitdecode = { path = "../../verilog2fpga/v2f-bitdecode" }
+v2f-core = { path = "../../verilog2fpga/v2f-core" }
+v2f-db = { path = "../../verilog2fpga/v2f-db" }
+ruspice = { path = "../../ruspice" }
+base64 = "0.21"
+
+[lib]
+name = "eda4_web_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "eda4-web-server"
+path = "src/main.rs"

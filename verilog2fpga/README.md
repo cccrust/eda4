@@ -62,9 +62,6 @@ v2f build <input.v> [options]
 
 # 使用外部工具（需先安裝 yosys、nextpnr、icestorm）
 ./target/debug/v2f build examples/blinky/blinky.v --backend yosys --output _out/blinky_yosys
-
-# 用 Rust HDL DSL 寫電路（需要 --lang rust）
-./target/debug/v2f build examples/blinky/blinky.v --lang rust --output _out/blinky_rust
 ```
 
 #### `v2f synth` — 只做綜合
@@ -263,8 +260,6 @@ verilog2fpga/
 ├── v2f-bitdecode/     位元流解碼器 BIN → JSON（v2f-bitdecode）
 ├── v2f-programmer/    JTAG / SPI Flash 燒錄（mock + 實際）
 ├── v2f-db/            iCE40 裝置資料庫（Tile 位置、CRAM 定址）
-├── v2f-rust/          Rust HDL (`fpga!` macro) → JSON
-├── v2f-rust-macros/   fpga! 巨集實作
 ├── v2f-viz/           網表/ASC 視覺化工具
 ├── examples/          範例電路
 │   ├── blinky/        LED 閃爍（.v + .pcf）

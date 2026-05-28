@@ -44,5 +44,7 @@ impl Mux4 {
         if get(&self.y) != get(&self.i3) { set(&self.y, get(&self.i3)); }
     }
     }
+    pub fn run(&mut self) {
+    }
 }
 
