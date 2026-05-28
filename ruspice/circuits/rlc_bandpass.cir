@@ -1,0 +1,10 @@
+* RLC Bandpass Filter
+* R=100R, L=10mH, C=1uF
+* fc = 1/(2*pi*sqrt(L*C)) ~= 1.59kHz
+
+V1 Vin gnd DC 0 AC 1
+R1 Vin Vout 100
+L1 Vin Vout 10m
+C1 Vout gnd 1u
+
+.END

@@ -1,0 +1,11 @@
+* Wheatstone Bridge (balanced)
+* All resistors 100R, supply 10V
+
+V1 V+ gnd DC 10
+R1 V+ a 100
+R2 a gnd 100
+R3 V+ b 100
+R4 b gnd 100
+RL a b 1k
+
+.END

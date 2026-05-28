@@ -1,6 +1,6 @@
 # eda4 Wiki Index
 
-> 本 wiki 收錄 eda4 計劃相關的專有名詞說明，涵蓋 EDA 工具鏈、FPGA 架構、硬體描述語言、數位電路模擬等領域。
+> 本 wiki 收錄 eda4 計劃相關的專有名詞說明，涵蓋 EDA 工具鏈、FPGA 架構、硬體描述語言、數位電路模擬、自訂晶片設計等領域。
 
 ## 入門概念
 
@@ -8,7 +8,10 @@
 |------|------|
 | [EDA](eda.md) | 電子設計自動化 — 用軟體設計硬體的學科 |
 | [FPGA](fpga.md) | 現場可程式化閘陣列 — 可重構硬體平台 |
+| [ASIC](asic.md) | 應用專屬積體電路 — 全定製晶片設計 |
+| [CMOS / MOSFET](cmos.md) | 互補式金氧半導體 — 數位電路的電晶體基礎 |
 | [Verilog HDL](verilog.md) | 硬體描述語言 — 數位電路設計的 lingua franca |
+| [RTL](rtl.md) | 暫存器傳輸層級 — 數位設計的事實標準抽象層 |
 
 ## FPGA 架構
 
@@ -23,12 +26,26 @@
 
 | 詞條 | 說明 |
 |------|------|
-| [Synthesis](synthesis.md) | 邏輯合成 — 將 HDL 轉換為閘級電路 |
+| [Synthesis / Techmap](synthesis.md) | 邏輯合成 — 將 HDL 轉換為閘級電路 |
 | [Netlist / Yosys-JSON](netlist.md) | 網表 — 電路的圖形化中間表示 |
 | [Place & Route](pnr.md) | 佈局與繞線 — 將邏輯放置到實體位置並連接 |
 | [Simulated Annealing](simulated_annealing.md) | 模擬退火 — 佈局最佳化演算法 |
 | [A* Routing](a_star_routing.md) | A* 路徑搜尋 — 繞線核心演算法 |
+| [Standard Cell](standard_cell.md) | 標準單元 — ASIC 自動化設計的建構方塊 |
+| [Floorplanning / PDN](floorplanning.md) | 晶片平面規劃與電源分佈網絡 |
+| [Static Timing Analysis](static_timing_analysis.md) | 靜態時序分析 — 時序驗證的黃金標準 |
+| [Clock Tree / CDC](clocking.md) | 時脈樹合成與跨時脈域設計 |
 | [JTAG / SPI](jtag_spi.md) | FPGA 燒錄通訊協定 |
+| [Design for Test](dft.md) | 可測試性設計 — 掃描鏈、邊界掃描、BIST |
+
+## 自訂晶片設計
+
+| 詞條 | 說明 |
+|------|------|
+| [OpenLANE / Open-Source ASIC 流程](openlane.md) | 從 RTL 到 GDSII 的開源 ASIC 設計流程 |
+| [SPICE Simulation](spice.md) | 電晶體層級電路模擬 |
+| [Formal Verification](formal_verification.md) | 形式驗證 — 等價性檢查與模型檢驗 |
+| [RISC-V](riscv.md) | 開放指令集架構 |
 
 ## Verilog2Rust 生態
 

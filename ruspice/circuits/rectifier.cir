@@ -1,0 +1,8 @@
+* Diode Rectifier (simplified - using resistor load)
+* D1 drops ~0.7V
+
+V1 Vin gnd DC 5 AC 3
+D1 Vin Vout 1N4148
+R1 Vout gnd 1k
+
+.END

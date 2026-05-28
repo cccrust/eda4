@@ -1,0 +1,8 @@
+* Resistor Divider
+* Vin=10V, R1=1k, R2=1k -> Vout=5V
+
+V1 Vin gnd DC 10
+R1 Vin Vout 1k
+R2 Vout gnd 1k
+
+.END

@@ -1,4 +1,4 @@
-use ruspice::{Circuit, analyze_dc, analyze_ac, analyze_transient};
+use ruspice::{parse_spice, run_analysis, AnalysisOptions, Circuit, analyze_dc, analyze_ac, analyze_transient};
 use ruspice::visualization;
 use std::env;
 use std::fs;
@@ -186,6 +186,37 @@ fn main() {
                 let node = args.get(3).map(|s| s.as_str()).unwrap_or("vout");
                 cmd_save_plot(&circuit, filename, node);
             }
+            "cir" => {
+                if let Some(path) = args.get(2) {
+                    match fs::read_to_string(path) {
+                        Ok(content) => {
+                            println!("Loading: {}", path);
+                            match parse_spice(&content) {
+                                Ok(c) => {
+                                    let opts = AnalysisOptions::default();
+                                    run_analysis(&c, &opts);
+                                }
+                                Err(e) => eprintln!("Parse error: {}", e),
+                            }
+                        }
+                        Err(e) => eprintln!("Error reading file: {}", e),
+                    }
+                } else {
+                    println!("Usage: ruspice cir <file.cir>");
+                }
+            }
+            "list" => {
+                println!("Available .cir examples in circuits/:");
+                if let Ok(entries) = fs::read_dir("circuits") {
+                    for entry in entries.filter_map(Result::ok) {
+                        if let Some(ext) = entry.path().extension() {
+                            if ext == "cir" {
+                                println!("  {}", entry.file_name().to_string_lossy());
+                            }
+                        }
+                    }
+                }
+            }
             _ => {
                 println!("Usage: ruspice [command]");
                 println!("Commands:");
@@ -199,6 +230,8 @@ fn main() {
                 println!("  plot-ac [node]  - Plot AC frequency response");
                 println!("  svg [file]      - Save circuit as SVG (default: circuit.svg)");
                 println!("  save-plot [f] [n] - Save transient plot to SVG file");
+                println!("  cir <file>     - Run SPICE netlist file");
+                println!("  list           - List available .cir examples");
                 println!();
                 println!("Running all demos by default...\n");
                 demo_resistor_divider();

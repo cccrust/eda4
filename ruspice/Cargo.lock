@@ -156,6 +156,7 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "nalgebra",
+ "num-complex",
  "serde",
  "serde_json",
 ]

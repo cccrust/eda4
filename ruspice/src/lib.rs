@@ -285,10 +285,8 @@ impl Solver {
                 .count();
             let total_unknowns = n - 1 + num_v_sources;
 
-            let mut conductance_re = DMatrix::zeros(total_unknowns, total_unknowns);
-            let mut conductance_im = DMatrix::zeros(total_unknowns, total_unknowns);
-            let mut rhs_re: DVector<f64> = DVector::zeros(total_unknowns);
-            let mut rhs_im: DVector<f64> = DVector::zeros(total_unknowns);
+            let mut gm = DMatrix::zeros(total_unknowns, total_unknowns);
+            let mut rhs = DVector::zeros(total_unknowns);
 
             for comp in &self.circuit.components {
                 match comp.component_type {
@@ -298,14 +296,14 @@ impl Solver {
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         if comp.node_pos != self.circuit.ground {
-                            conductance_re[(n1, n1)] += g;
+                            gm[(n1, n1)] += g;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            conductance_re[(n2, n2)] += g;
+                            gm[(n2, n2)] += g;
                         }
                         if comp.node_pos != self.circuit.ground && comp.node_neg != self.circuit.ground {
-                            conductance_re[(n1, n2)] -= g;
-                            conductance_re[(n2, n1)] -= g;
+                            gm[(n1, n2)] -= g;
+                            gm[(n2, n1)] -= g;
                         }
                     }
                     ComponentType::Capacitor => {
@@ -314,14 +312,14 @@ impl Solver {
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         if comp.node_pos != self.circuit.ground {
-                            conductance_im[(n1, n1)] += g;
+                            gm[(n1, n1)] += g;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            conductance_im[(n2, n2)] += g;
+                            gm[(n2, n2)] += g;
                         }
                         if comp.node_pos != self.circuit.ground && comp.node_neg != self.circuit.ground {
-                            conductance_im[(n1, n2)] -= g;
-                            conductance_im[(n2, n1)] -= g;
+                            gm[(n1, n2)] -= g;
+                            gm[(n2, n1)] -= g;
                         }
                     }
                     ComponentType::Inductor => {
@@ -330,59 +328,69 @@ impl Solver {
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         if comp.node_pos != self.circuit.ground {
-                            conductance_im[(n1, n1)] -= g;
+                            gm[(n1, n1)] += g;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            conductance_im[(n2, n2)] -= g;
+                            gm[(n2, n2)] += g;
                         }
                         if comp.node_pos != self.circuit.ground && comp.node_neg != self.circuit.ground {
-                            conductance_im[(n1, n2)] += g;
-                            conductance_im[(n2, n1)] += g;
+                            gm[(n1, n2)] -= g;
+                            gm[(n2, n1)] -= g;
                         }
                     }
-                    ComponentType::VoltageSource => {
+ComponentType::CurrentSource => {
                         let amp = if comp.ac_amplitude > 0.0 { comp.ac_amplitude } else { comp.value };
-                        let phase = comp.ac_phase;
+                        let phase = comp.ac_phase.to_radians();
                         let n1 = if comp.node_pos == self.circuit.ground { 0 } else { comp.node_pos - 1 };
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
+                        let re = amp * phase.cos();
                         if comp.node_pos != self.circuit.ground {
-                            conductance_re[(n1, n1)] += 1.0;
-                            rhs_re[n1] += amp * phase.to_radians().cos();
-                            rhs_im[n1] += amp * phase.to_radians().sin();
+                            rhs[n1] -= re;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            conductance_re[(n2, n2)] += 1.0;
-                            rhs_re[n2] -= amp * phase.to_radians().cos();
-                            rhs_im[n2] -= amp * phase.to_radians().sin();
-                        }
-                    }
-                    ComponentType::CurrentSource => {
-                        let amp = if comp.ac_amplitude > 0.0 { comp.ac_amplitude } else { comp.value };
-                        let phase = comp.ac_phase;
-                        let n1 = if comp.node_pos == self.circuit.ground { 0 } else { comp.node_pos - 1 };
-                        let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
-
-                        if comp.node_pos != self.circuit.ground {
-                            rhs_re[n1] -= amp * phase.to_radians().cos();
-                            rhs_im[n1] -= amp * phase.to_radians().sin();
-                        }
-                        if comp.node_neg != self.circuit.ground {
-                            rhs_re[n2] += amp * phase.to_radians().cos();
-                            rhs_im[n2] += amp * phase.to_radians().sin();
+                            rhs[n2] += re;
                         }
                     }
                     _ => {}
                 }
             }
 
+            let mut vs_idx = n - 1;
+            for comp in &self.circuit.components {
+                if matches!(comp.component_type, ComponentType::VoltageSource) {
+                    let amp = if comp.ac_amplitude > 0.0 { comp.ac_amplitude } else { comp.value };
+                    let phase = comp.ac_phase.to_radians();
+                    let n1 = if comp.node_pos == self.circuit.ground { 0 } else { comp.node_pos - 1 };
+                    let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
+
+                    if comp.node_pos != self.circuit.ground {
+                        gm[(n1, vs_idx)] = 1.0;
+                        gm[(vs_idx, n1)] = 1.0;
+                    }
+                    if comp.node_neg != self.circuit.ground {
+                        gm[(n2, vs_idx)] = -1.0;
+                        gm[(vs_idx, n2)] = -1.0;
+                    }
+                    rhs[vs_idx] = amp * phase.cos();
+                    vs_idx += 1;
+                }
+            }
+
+            let voltages = match gm.clone().try_inverse() {
+                Some(inv) => inv * rhs,
+                None => {
+                    let lu = gm.lu();
+                    lu.solve(&rhs).unwrap_or_else(|| DVector::zeros(total_unknowns))
+                }
+            };
+
             let mut mag = Vec::new();
             let mut ph = Vec::new();
             for i in 0..n {
-                let v_re = if i == 0 { 0.0 } else { conductance_re[(i-1, 0)] };
-                let v_im = if i == 0 { 0.0 } else { conductance_im[(i-1, 0)] };
-                let v_mag = (v_re * v_re + v_im * v_im).sqrt();
-                let v_phase = v_im.atan2(v_re);
+                let v = if i == 0 { 0.0 } else { voltages[i - 1] };
+                let v_mag = v.abs();
+                let v_phase = v.atan2(0.0);
                 mag.push(v_mag);
                 ph.push(v_phase);
             }
@@ -549,9 +557,34 @@ pub fn analyze_transient(circuit: &Circuit, start_time: f64, end_time: f64, time
     solver.transient_analysis(start_time, end_time, time_step)
 }
 
+fn parse_spice_value(s: &str) -> Result<f64, String> {
+    let s = s.trim();
+    if s.is_empty() {
+        return Err("Empty value".to_string());
+    }
+    let multiplier = match s.chars().last() {
+        Some('k') | Some('K') => 1e3,
+        Some('m') | Some('M') => 1e-3,
+        Some('u') | Some('U') => 1e-6,
+        Some('n') | Some('N') => 1e-9,
+        Some('p') | Some('P') => 1e-12,
+        Some('f') | Some('F') => 1e-15,
+        Some('g') | Some('G') if s.len() > 1 => 1e9,
+        Some('t') | Some('T') => 1e12,
+        _ => 1.0,
+    };
+    let num_str = if multiplier != 1.0 {
+        &s[..s.len() - 1]
+    } else {
+        s
+    };
+    num_str.parse::<f64>()
+        .map(|v| v * multiplier)
+        .map_err(|_| format!("Invalid number: {}", s))
+}
+
 pub fn parse_spice(netlist: &str) -> Result<Circuit, String> {
     let mut circuit = Circuit::new("SPICE Netlist");
-    let mut title = String::new();
 
     for line in netlist.lines() {
         let line = line.trim();
@@ -566,66 +599,74 @@ pub fn parse_spice(netlist: &str) -> Result<Circuit, String> {
 
         let first = parts[0];
 
-        if first == "V" || first == "v" {
+        if first.starts_with('V') || first.starts_with('v') {
             if parts.len() >= 4 {
                 let name = parts[0];
                 let node_pos = parts[1];
                 let node_neg = parts[2];
-                let dc_value: f64 = parts[3].parse().map_err(|_| format!("Invalid DC value for {}", name))?;
-                circuit.add_node(node_pos);
-                circuit.add_node(node_neg);
-                circuit.add_voltage_source(name, node_pos, node_neg, dc_value);
-                if parts.len() >= 7 && parts[4].to_uppercase() == "AC" {
-                    let ac_amp: f64 = parts[5].parse().unwrap_or(1.0);
-                    if let Some(comp) = circuit.components.last_mut() {
-                        comp.ac_amplitude = ac_amp;
+                let (dc_idx, ac_idx) = if parts.len() >= 5 && parts[3].to_uppercase() == "DC" {
+                    if parts.len() >= 7 && parts[5].to_uppercase() == "AC" {
+                        (4, 6)
+                    } else {
+                        (4, 0)
                     }
+                } else if parts.len() >= 5 && parts[3].to_uppercase() == "AC" {
+                    (3, 4)
+                } else {
+                    (3, 0)
+                };
+                let dc_value: f64 = parse_spice_value(parts[dc_idx]).map_err(|e| format!("Invalid DC value for {}: {}", name, e))?;
+                let np = circuit.add_node(node_pos);
+                let nn = circuit.add_node(node_neg);
+                let mut comp = Component::voltage_source(name, np, nn, dc_value);
+                if ac_idx > 0 && parts.len() > ac_idx {
+                    comp.ac_amplitude = parse_spice_value(parts[ac_idx]).unwrap_or(1.0);
                 }
+                circuit.add_component(comp);
             }
-        } else if first == "R" || first == "r" {
+        } else if first.starts_with('R') || first.starts_with('r') {
             if parts.len() >= 4 {
                 let name = parts[0];
                 let node_pos = parts[1];
                 let node_neg = parts[2];
-                let value: f64 = parts[3].parse().map_err(|_| format!("Invalid resistance for {}", name))?;
-                circuit.add_node(node_pos);
-                circuit.add_node(node_neg);
-                circuit.add_resistor(name, node_pos, node_neg, value);
+                let value: f64 = parse_spice_value(parts[3]).map_err(|e| format!("Invalid resistance for {}: {}", name, e))?;
+                let np = circuit.add_node(node_pos);
+                let nn = circuit.add_node(node_neg);
+                circuit.add_component(Component::resistor(name, np, nn, value));
             }
-        } else if first == "C" || first == "c" {
+        } else if first.starts_with('C') || first.starts_with('c') {
             if parts.len() >= 4 {
                 let name = parts[0];
                 let node_pos = parts[1];
                 let node_neg = parts[2];
-                let value: f64 = parts[3].parse().map_err(|_| format!("Invalid capacitance for {}", name))?;
-                circuit.add_node(node_pos);
-                circuit.add_node(node_neg);
-                circuit.add_capacitor(name, node_pos, node_neg, value);
+                let value: f64 = parse_spice_value(parts[3]).map_err(|e| format!("Invalid capacitance for {}: {}", name, e))?;
+                let np = circuit.add_node(node_pos);
+                let nn = circuit.add_node(node_neg);
+                circuit.add_component(Component::capacitor(name, np, nn, value));
             }
-        } else if first == "L" || first == "l" {
+        } else if first.starts_with('L') || first.starts_with('l') {
             if parts.len() >= 4 {
                 let name = parts[0];
                 let node_pos = parts[1];
                 let node_neg = parts[2];
-                let value: f64 = parts[3].parse().map_err(|_| format!("Invalid inductance for {}", name))?;
-                circuit.add_node(node_pos);
-                circuit.add_node(node_neg);
-                circuit.add_inductor(name, node_pos, node_neg, value);
+                let value: f64 = parse_spice_value(parts[3]).map_err(|e| format!("Invalid inductance for {}: {}", name, e))?;
+                let np = circuit.add_node(node_pos);
+                let nn = circuit.add_node(node_neg);
+                circuit.add_component(Component::inductor(name, np, nn, value));
             }
-        } else if first == "I" || first == "i" {
+        } else if first.starts_with('I') || first.starts_with('i') {
             if parts.len() >= 4 {
                 let name = parts[0];
                 let node_pos = parts[1];
                 let node_neg = parts[2];
-                let value: f64 = parts[3].parse().map_err(|_| format!("Invalid current for {}", name))?;
-                circuit.add_node(node_pos);
-                circuit.add_node(node_neg);
-                circuit.add_current_source(name, node_pos, node_neg, value);
+                let value: f64 = parse_spice_value(parts[3]).map_err(|e| format!("Invalid current for {}: {}", name, e))?;
+                let np = circuit.add_node(node_pos);
+                let nn = circuit.add_node(node_neg);
+                circuit.add_component(Component::current_source(name, np, nn, value));
             }
         } else if line.to_uppercase().starts_with(".TITLE") {
             if parts.len() >= 2 {
-                title = parts[1..].join(" ");
-                circuit.name = title.clone();
+                circuit.name = parts[1..].join(" ");
             }
         }
     }
@@ -698,6 +739,43 @@ pub fn run_analysis(circuit: &Circuit, opts: &AnalysisOptions) {
                 println!("  {:.5}   | {:.4}V", t, result.node_voltages[i][node_idx]);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod spice_parser_tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_simple_voltage_source() {
+        let netlist = "V1 Vin gnd DC 10\n.END";
+        let circuit = parse_spice(netlist).unwrap();
+        assert_eq!(circuit.nodes.len(), 2);
+        assert_eq!(circuit.components.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_resistor() {
+        let netlist = "V1 Vin gnd DC 10\nR1 Vin Vout 1k\nR2 Vout gnd 1k\n.END";
+        let circuit = parse_spice(netlist).unwrap();
+        assert_eq!(circuit.nodes.len(), 3);
+        assert_eq!(circuit.components.len(), 3);
+    }
+
+    #[test]
+    fn test_parse_rc_circuit() {
+        let netlist = "V1 Vin gnd DC 5\nR1 Vin Vout 1k\nC1 Vout gnd 1u\n.END";
+        let circuit = parse_spice(netlist).unwrap();
+        assert_eq!(circuit.nodes.len(), 3);
+        assert_eq!(circuit.components.len(), 3);
+    }
+
+    #[test]
+    fn test_parse_with_comments() {
+        let netlist = "* Comment\nV1 Vin gnd DC 10\n* Another comment\nR1 Vin Vout 1k\n.END";
+        let circuit = parse_spice(netlist).unwrap();
+        assert_eq!(circuit.nodes.len(), 3);
+        assert_eq!(circuit.components.len(), 2);
     }
 }
 

@@ -1,0 +1,8 @@
+* RC Charging Circuit
+* R=1k, C=1uF, tau=1ms
+
+V1 Vin gnd DC 5
+R1 Vin Vout 1k
+C1 Vout gnd 1u
+
+.END

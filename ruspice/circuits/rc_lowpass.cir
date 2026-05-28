@@ -1,0 +1,8 @@
+* RC Low-Pass Filter (AC analysis)
+* fc = 1/(2*pi*R*C) = 1/(2*pi*1k*100n) ~= 1.59kHz
+
+V1 Vin gnd DC 0 AC 1
+R1 Vin Vout 1k
+C1 Vout gnd 100n
+
+.END
