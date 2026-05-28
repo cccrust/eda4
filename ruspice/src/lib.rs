@@ -1,4 +1,5 @@
 use nalgebra::{DMatrix, DVector};
+use num_complex::Complex64;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

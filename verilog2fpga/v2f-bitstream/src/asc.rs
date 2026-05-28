@@ -218,15 +218,15 @@ pub fn parse_asc(input: &str) -> Result<AscFile, AscError> {
             }
             ".wiring" => {
                 if let Some(ref mut cfg) = cur_logic {
-                    if parts.len() >= 4 {
+                    if parts.len() >= 5 {
                         let bit = parts[1].parse().map_err(|e| err(lineno, format!("無效 wiring bit: {e}")))?;
-                        let value = parts[3].parse().map_err(|e| err(lineno, format!("無效 wiring value: {e}")))?;
+                        let value = parts[4].parse().map_err(|e| err(lineno, format!("無效 wiring value: {e}")))?;
                         cfg.wiring.push(WiringEntry { bit_index: bit, value });
                     }
                 } else if let Some(ref mut cfg) = cur_io {
-                    if parts.len() >= 4 {
+                    if parts.len() >= 5 {
                         let bit = parts[1].parse().map_err(|e| err(lineno, format!("無效 wiring bit: {e}")))?;
-                        let value = parts[3].parse().map_err(|e| err(lineno, format!("無效 wiring value: {e}")))?;
+                        let value = parts[4].parse().map_err(|e| err(lineno, format!("無效 wiring value: {e}")))?;
                         cfg.wiring.push(WiringEntry { bit_index: bit, value });
                     }
                 }
