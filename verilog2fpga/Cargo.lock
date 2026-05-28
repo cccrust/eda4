@@ -3427,6 +3427,7 @@ dependencies = [
  "serde_json",
  "v2f-core",
  "v2f-db",
+ "v2f-synth",
 ]
 
 [[package]]

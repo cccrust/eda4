@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+<style>
+    .wire { stroke: #333; stroke-width: 2; fill: none; }
+    .component { stroke: #006; stroke-width: 2; fill: none; }
+    .label { font-family: monospace; font-size: 12px; fill: #333; }
+    .node { fill: #333; }
+</style>
+<text x="10" y="20" class="label">Circuit: RC Charging</text>
+<text x="10" y="380" class="label">Nodes: 3 | Components: 3</text>
+  <line x1="300" y1="50" x2="517" y2="237" class="wire"/>
+  <text x="408" y="134" class="label" text-anchor="middle">R1 = 1000.00</text>
+  <path d="M 300,50 L 517,237" class="component"/>
+  <text x="408" y="159" class="label">1000Ω</text>
+  <line x1="517" y1="237" x2="550" y2="300" class="wire"/>
+  <text x="533" y="259" class="label" text-anchor="middle">C1 = 0.00</text>
+  <line x1="517" y1="237" x2="550" y2="300" class="wire"/>
+  <line x1="525" y1="261" x2="525" y2="277" class="component"/>
+  <line x1="541" y1="261" x2="541" y2="277" class="component"/>
+  <text x="533" y="294" class="label">0.000001F</text>
+  <line x1="300" y1="50" x2="550" y2="300" class="wire"/>
+  <text x="425" y="165" class="label" text-anchor="middle">V1 = 5.00</text>
+  <circle cx="425" cy="175" r="10" class="component"/>
+  <text x="440" y="170" class="label">+5V</text>
+</svg>

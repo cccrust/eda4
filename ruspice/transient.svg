@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+<style>
+    .grid { stroke: #ddd; stroke-width: 1; }
+    .axis { stroke: #333; stroke-width: 2; }
+    .line { fill: none; stroke: #0066cc; stroke-width: 2; }
+    .title { font-family: sans-serif; font-size: 16px; fill: #333; }
+    .label { font-family: sans-serif; font-size: 12px; fill: #666; }
+</style>
+<text x="300" y="25" class="title">Transient Response</text>
+  <line x1="60" y1="40" x2="570" y2="40" class="grid"/>
+  <text x="55" y="44" class="label" text-anchor="end">4.961</text>
+  <line x1="60" y1="117.5" x2="570" y2="117.5" class="grid"/>
+  <text x="55" y="121.5" class="label" text-anchor="end">3.835</text>
+  <line x1="60" y1="195" x2="570" y2="195" class="grid"/>
+  <text x="55" y="199" class="label" text-anchor="end">2.708</text>
+  <line x1="60" y1="272.5" x2="570" y2="272.5" class="grid"/>
+  <text x="55" y="276.5" class="label" text-anchor="end">1.581</text>
+  <line x1="60" y1="350" x2="570" y2="350" class="grid"/>
+  <text x="55" y="354" class="label" text-anchor="end">0.455</text>
+  <line x1="60" y1="40" x2="60" y2="350" class="grid"/>
+  <text x="60" y="370" class="label" text-anchor="middle">0.0000</text>
+  <line x1="187.5" y1="40" x2="187.5" y2="350" class="grid"/>
+  <text x="187.5" y="370" class="label" text-anchor="middle">0.0013</text>
+  <line x1="315" y1="40" x2="315" y2="350" class="grid"/>
+  <text x="315" y="370" class="label" text-anchor="middle">0.0025</text>
+  <line x1="442.5" y1="40" x2="442.5" y2="350" class="grid"/>
+  <text x="442.5" y="370" class="label" text-anchor="middle">0.0037</text>
+  <line x1="570" y1="40" x2="570" y2="350" class="grid"/>
+  <text x="570" y="370" class="label" text-anchor="middle">0.0050</text>
+  <line x1="60" y1="350" x2="570" y2="350" class="axis"/>
+  <line x1="60" y1="40" x2="60" y2="350" class="axis"/>
+  <text x="300" y="395" class="label" text-anchor="middle">Time (s)</text>
+  <text x="15" y="200" class="label" text-anchor="middle" transform="rotate(-90, 15, 200)">Voltage (V)</text>
+  <polyline points="60.0,350.0 70.2,321.6 80.4,295.7 90.6,272.2 100.8,250.9 111.0,231.5 121.2,213.8 131.4,197.8 141.6,183.2 151.8,169.9 162.0,157.9 172.2,146.9 182.4,137.0 192.6,127.9 202.8,119.7 213.0,112.2 223.2,105.4 233.4,99.2 243.6,93.6 253.8,88.5 264.0,83.8 274.2,79.6 284.4,75.7 294.6,72.3 304.8,69.1 315.0,66.2 325.2,63.6 335.4,61.2 345.6,59.0 355.8,57.0 366.0,55.3 376.2,53.6 386.4,52.1 396.6,50.8 406.8,49.6 417.0,48.5 427.2,47.5 437.4,46.5 447.6,45.7 457.8,44.9 468.0,44.2 478.2,43.6 488.4,43.0 498.6,42.5 508.8,42.1 519.0,41.6 529.2,41.2 539.4,40.9 549.6,40.6 559.8,40.3 570.0,40.0" class="line"/>
+</svg>

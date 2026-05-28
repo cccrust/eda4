@@ -1,0 +1,25 @@
+[package]
+name = "ruspice"
+version = "0.1.0"
+edition = "2021"
+description = "Analog circuit simulator in Rust"
+license = "MIT"
+repository = "https://github.com/anomalyco/ruspice"
+keywords = ["circuit", "simulation", "spice", "analog", "electronics"]
+categories = ["science", "simulation"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+nalgebra = "0.33"
+
+[dev-dependencies]
+approx = "0.5"
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[[test]]
+name = "integration"
+path = "tests/integration_test.rs"
