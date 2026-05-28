@@ -12,14 +12,14 @@ pub fn build_nets(_cell_names: &[String], conns: &[Vec<usize>]) -> Vec<Vec<usize
     conns.to_vec()
 }
 
-pub fn random_placement(cell_names: &[String], _conns: &[Vec<usize>], arch: &ArchGraph) -> Placement {
+pub fn random_placement(cell_names: &[String], conns: &[Vec<usize>], arch: &ArchGraph) -> Placement {
     let logic_tiles = arch.logic_tiles();
     let mut rng = rand::thread_rng();
     let cell_to_coord: Vec<(String, TileCoord)> = cell_names.iter().map(|name| {
         let idx = rng.gen_range(0..logic_tiles.len());
         (name.clone(), logic_tiles[idx])
     }).collect();
-    let nets = build_nets(cell_names, &[]);
+    let nets = build_nets(cell_names, conns);
     let cost = cost::evaluate(&cell_to_coord, &nets, &PlacerCost::default());
     Placement { cell_to_coord, nets, cost }
 }

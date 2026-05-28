@@ -51,42 +51,54 @@ pub fn parse_json(json_str: &str) -> PnrNetlist {
     let top_mod = parsed.modules.values().next().expect("無模組");
     let mut cell_names = Vec::new();
     let mut cell_types = Vec::new();
-    let mut bit_to_cell: HashMap<u64, usize> = HashMap::new();
+    // Collect all cell names + types
     for (name, cell) in &top_mod.cells {
-        let idx = cell_names.len();
         cell_names.push(name.clone());
         cell_types.push(cell.cell_type.clone());
+    }
+    // Add ports as special "PORT" cells
+    for (name, _port) in &top_mod.ports {
+        cell_names.push(format!("port_{}", name));
+        cell_types.push("PORT".to_string());
+    }
+    // Build bit → cell indices lookup
+    let mut bit_to_cells: HashMap<u64, Vec<usize>> = HashMap::new();
+    for (i, (name, cell)) in top_mod.cells.iter().enumerate() {
         for conns in cell.connections.values() {
             for &b in conns {
-                bit_to_cell.entry(b).or_insert(idx);
+                bit_to_cells.entry(b).or_default().push(i);
             }
         }
     }
-    for (name, port) in &top_mod.ports {
-        let idx = cell_names.len();
-        cell_names.push(format!("port_{}", name));
-        cell_types.push("PORT".to_string());
-        for &b in &port.bits {
-            bit_to_cell.entry(b).or_insert(idx);
+    for (i, (name, _port)) in top_mod.ports.iter().enumerate() {
+        let idx = cell_names.len() - top_mod.ports.len() + i;
+        for &b in &_port.bits {
+            bit_to_cells.entry(b).or_default().push(idx);
         }
     }
+    // Build net groups from netnames: each netname = one group of connected cells
     let mut net_conns: Vec<Vec<usize>> = Vec::new();
-    let mut processed = std::collections::HashSet::new();
-    for (&_bit, &cell_idx) in &bit_to_cell {
-        if processed.contains(&cell_idx) { continue; }
-        processed.insert(cell_idx);
-        let mut group = vec![cell_idx];
-        for (b, &ci) in &bit_to_cell {
-            if ci != cell_idx {
-                let same_net = top_mod.netnames.values().any(|n| n.bits.contains(b) && n.bits.contains(&_bit));
-                if same_net {
-                    if processed.insert(ci) {
-                        group.push(ci);
+    let mut processed: std::collections::HashSet<usize> = std::collections::HashSet::new();
+    for (_net_name, net) in &top_mod.netnames {
+        let mut group: Vec<usize> = Vec::new();
+        for &b in &net.bits {
+            if let Some(indices) = bit_to_cells.get(&b) {
+                for &idx in indices {
+                    if processed.insert(idx) {
+                        group.push(idx);
                     }
                 }
             }
         }
-        net_conns.push(group);
+        if !group.is_empty() {
+            net_conns.push(group);
+        }
+    }
+    // Add any unconnected cells as single-cell nets
+    for idx in 0..cell_names.len() {
+        if !processed.contains(&idx) {
+            net_conns.push(vec![idx]);
+        }
     }
     PnrNetlist { cell_names, cell_types, net_conns }
 }

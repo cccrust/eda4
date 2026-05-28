@@ -38,9 +38,19 @@ struct TilePlacement {
 }
 
 #[derive(Clone, Debug)]
+struct WiringSeg {
+    from_row: u32,
+    from_col: u32,
+    to_row: u32,
+    to_col: u32,
+    track: u32,
+}
+
+#[derive(Clone, Debug)]
 struct Layout {
     device: String,
     tiles: Vec<TilePlacement>,
+    wiring: Vec<WiringSeg>,
     cols: u32,
     rows: u32,
 }
@@ -320,6 +330,7 @@ fn parse_netlist(text: &str) -> Result<Netlist, String> {
 fn parse_layout(text: &str) -> Result<Layout, String> {
     let mut device = String::new();
     let mut tiles = Vec::new();
+    let mut wiring = Vec::new();
     let mut pending: Option<(u32, u32)> = None;
 
     for line in text.lines() {
@@ -336,7 +347,6 @@ fn parse_layout(text: &str) -> Result<Layout, String> {
                 let x: u32 = parts[0].parse().map_err(|_| format!("bad tile x: {}", parts[0]))?;
                 let y: u32 = parts[1].parse().map_err(|_| format!("bad tile y: {}", parts[1]))?;
                 if parts.len() >= 6 {
-                    // compact format: .logic_tile x y a b c "cell_name"
                     let cell_name = parts[5].trim_matches('"').to_string();
                     tiles.push(TilePlacement { x, y, cell_name });
                 } else {
@@ -351,20 +361,37 @@ fn parse_layout(text: &str) -> Result<Layout, String> {
                     tiles.push(TilePlacement { x, y, cell_name });
                 }
             }
+        } else if line.starts_with(".wiring ") {
+            let rest = line.trim_start_matches(".wiring ").trim();
+            let parts: Vec<&str> = rest.split_whitespace().collect();
+            if parts.len() >= 4 {
+                let from_col: u32 = parts[0].parse().map_err(|_| format!("bad wiring col: {}", parts[0]))?;
+                let from_row: u32 = parts[1].parse().map_err(|_| format!("bad wiring row: {}", parts[1]))?;
+                let to_col: u32 = parts[2].parse().map_err(|_| format!("bad wiring to_col: {}", parts[2]))?;
+                let track: u32 = parts[3].parse().map_err(|_| format!("bad wiring track: {}", parts[3]))?;
+                let to_row = if from_col == to_col { from_row + 1 } else { from_row };
+                wiring.push(WiringSeg { from_row, from_col, to_row, to_col, track });
+            }
         } else {
             pending = None;
         }
     }
 
+    // Grid size from Ice40Device (rows = num_rows - 2 for IO tile margins)
     let (cols, rows) = match device.as_str() {
-        d if d.contains("HX1K") || d.contains("LP1K") => (32, 9),
-        d if d.contains("HX4K") => (32, 15),
-        d if d.contains("HX8K") => (32, 20),
-        d if d.contains("UP5K") => (24, 11),
-        _ => (32, 20),
+        d if d.contains("HX1K") => (16, 28),
+        d if d.contains("LP1K") => (16, 28),
+        d if d.contains("HX4K") => (20, 38),
+        d if d.contains("HX8K") => (28, 68),
+        d if d.contains("UP5K") => (22, 38),
+        _ => {
+            let mc = tiles.iter().map(|t| t.x).max().unwrap_or(31);
+            let mr = tiles.iter().map(|t| t.y).max().unwrap_or(19);
+            (mc + 1, mr + 1)
+        }
     };
 
-    Ok(Layout { device, tiles, cols, rows })
+    Ok(Layout { device, tiles, wiring, cols, rows })
 }
 
 // ---------------------------------------------------------------------------
@@ -614,56 +641,12 @@ fn draw_routing(
         -(layout.rows as f32 * step_y) / 2.0,
     );
 
-    let mut cell_tile: HashMap<String, (u32, u32)> = HashMap::new();
-    for t in &layout.tiles {
-        cell_tile.insert(t.cell_name.clone(), (t.x, t.y));
-    }
+    let tile_center = |tx: u32, ty: u32| -> Pos2 {
+        Pos2::new(origin.x + tx as f32 * step_x + step_x / 2.0,
+                  origin.y + ty as f32 * step_y + step_y / 2.0)
+    };
 
-    fn tile_center(tx: u32, ty: u32, origin: Pos2, sx: f32, sy: f32) -> Pos2 {
-        Pos2::new(origin.x + tx as f32 * sx + sx / 2.0,
-                  origin.y + ty as f32 * sy + sy / 2.0)
-    }
-
-    let mut net_to_cells: HashMap<u64, Vec<String>> = HashMap::new();
-    for (name, cell) in &net.cells {
-        for (_port, bits) in &cell.ports {
-            for &b in bits {
-                net_to_cells.entry(b).or_default().push(name.clone());
-            }
-        }
-    }
-
-    let colors = [
-        Color32::from_rgba_premultiplied(137, 180, 250, 100),
-        Color32::from_rgba_premultiplied(166, 227, 161, 100),
-        Color32::from_rgba_premultiplied(249, 226, 175, 100),
-        Color32::from_rgba_premultiplied(243, 139, 168, 100),
-        Color32::from_rgba_premultiplied(203, 166, 247, 100),
-    ];
-    let mut color_idx = 0usize;
-
-    for (_net_id, cells) in &net_to_cells {
-        if cells.len() < 2 { continue; }
-        let mut positions: Vec<Pos2> = Vec::new();
-        for cname in cells {
-            if let Some(&(tx, ty)) = cell_tile.get(cname) {
-                positions.push(tile_center(tx, ty, origin, step_x, step_y));
-            }
-        }
-        if positions.len() < 2 { continue; }
-        let color = colors[color_idx % colors.len()];
-        color_idx += 1;
-
-        for i in 0..positions.len() {
-            for j in i + 1..positions.len() {
-                let from = to_screen(positions[i]);
-                let to = to_screen(positions[j]);
-                painter.line_segment([from, to], Stroke::new(1.0 * zoom, color));
-            }
-        }
-    }
-
-    // Background grid
+    // Step 1: background grid (drawn first, lines on top)
     for row in 0..layout.rows {
         for col in 0..layout.cols {
             let pos = Pos2::new(
@@ -675,6 +658,82 @@ fn draw_routing(
             let color = Color32::from_rgba_premultiplied(30, 30, 40, 100);
             painter.rect(rect, 1.0_f32, color, Stroke::new(0.3_f32, Color32::from_gray(40)));
         }
+    }
+
+    // Step 2: draw physical wiring segments from ASC
+    let track_colors = [
+        Color32::from_rgb(255, 100, 100),
+        Color32::from_rgb(100, 200, 255),
+        Color32::from_rgb(100, 255, 100),
+        Color32::from_rgb(255, 255, 100),
+        Color32::from_rgb(255, 150, 50),
+        Color32::from_rgb(200, 100, 255),
+        Color32::from_rgb(255, 100, 200),
+        Color32::from_rgb(100, 255, 200),
+    ];
+
+    for w in &layout.wiring {
+        let from = to_screen(tile_center(w.from_col, w.from_row));
+        let to = to_screen(tile_center(w.to_col, w.to_row));
+        let color = track_colors[(w.track as usize) % track_colors.len()];
+        painter.line_segment([from, to], Stroke::new(2.5 * zoom, color));
+    }
+
+    // Step 3: draw logical connectivity overlay (all-pairs)
+    let mut cell_tile: HashMap<String, (u32, u32)> = HashMap::new();
+    for t in &layout.tiles {
+        cell_tile.insert(t.cell_name.clone(), (t.x, t.y));
+    }
+
+    let mut net_to_cells: HashMap<u64, Vec<String>> = HashMap::new();
+    for (name, cell) in &net.cells {
+        for (_port, bits) in &cell.ports {
+            for &b in bits {
+                net_to_cells.entry(b).or_default().push(name.clone());
+            }
+        }
+    }
+
+    let net_colors = [
+        Color32::from_rgba_premultiplied(137, 180, 250, 60),
+        Color32::from_rgba_premultiplied(166, 227, 161, 60),
+        Color32::from_rgba_premultiplied(249, 226, 175, 60),
+        Color32::from_rgba_premultiplied(243, 139, 168, 60),
+        Color32::from_rgba_premultiplied(203, 166, 247, 60),
+    ];
+    let mut color_idx = 0usize;
+
+    for (_net_id, cells) in &net_to_cells {
+        if cells.len() < 2 { continue; }
+        let mut positions: Vec<Pos2> = Vec::new();
+        for cname in cells {
+            if let Some(&(tx, ty)) = cell_tile.get(cname) {
+                positions.push(tile_center(tx, ty));
+            }
+        }
+        if positions.len() < 2 { continue; }
+        let color = net_colors[color_idx % net_colors.len()];
+        color_idx += 1;
+
+        for i in 0..positions.len() {
+            for j in i + 1..positions.len() {
+                let from = to_screen(positions[i]);
+                let to = to_screen(positions[j]);
+                painter.line_segment([from, to], Stroke::new(0.8 * zoom, color));
+            }
+        }
+    }
+
+    // Step 4: used-tile highlights
+    let mut tile_map: HashMap<(u32, u32), &TilePlacement> = HashMap::new();
+    for t in &layout.tiles {
+        tile_map.insert((t.x, t.y), t);
+    }
+    for t in &layout.tiles {
+        let center = to_screen(tile_center(t.x, t.y));
+        let rect = Rect::from_center_size(center, vec2(tile_w * 0.8, tile_h * 0.8));
+        painter.rect(rect, 2.0_f32, Color32::from_rgba_premultiplied(60, 120, 60, 80),
+                     Stroke::new(0.5_f32, Color32::from_rgba_premultiplied(100, 180, 100, 120)));
     }
 }
 
@@ -777,7 +836,7 @@ mod tests {
         assert_eq!(lay.tiles.len(), 4);
         assert_eq!(lay.tiles[2].cell_name, "port_clk");
         assert_eq!(lay.tiles[3].cell_name, "port_led");
-        assert_eq!(lay.cols, 32);
-        assert_eq!(lay.rows, 20);
+        assert_eq!(lay.cols, 28);
+        assert_eq!(lay.rows, 68);
     }
 }
