@@ -312,3 +312,9 @@ verilog2rust/
   verilog/            # 範例 Verilog 設計與 testbench
   tests/              # 整合測試
 ```
+
+## 延伸閱讀
+
+- [Verilog (Wikipedia)](https://en.wikipedia.org/wiki/Verilog)
+- [Rust (Wikipedia)](https://en.wikipedia.org/wiki/Rust_(programming_language))
+- [Hardware-in-the-loop Simulation (Wikipedia)](https://en.wikipedia.org/wiki/Hardware-in-the-loop_simulation)

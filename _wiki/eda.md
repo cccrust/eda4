@@ -235,4 +235,12 @@ FPGA 工具鏈的民主化最終目標是讓更多人能夠參與數位系統設
 - Wolf, C., & Glaser, J. (2015). "Yosys -- A Free Verilog Synthesis Suite." _Proceedings of the 21st Austrian Workshop on Microelectronics (Austrochip)_. Yosys 的原始論文，介紹了其架構與能力。
 - Wolf, C., Shah, D., et al. (2018). "nextpnr: A Framework for Portable FPGA Place and Route." _Proceedings of the 8th International Workshop on FPGAs_. nextpnr 的架構設計論文。
 - Kranenburg, T., & Wolf, C. (2015). "Project IceStorm: Reverse Engineering the Lattice iCE40 Bitstream." _Proceedings of the 2015 ACM/SIGDA International Symposium on FPGAs_. IceStorm 專案的逆向工程方法。
+
+## 延伸閱讀
+
+- [EDA - Electronic Design Automation (Wikipedia)](https://en.wikipedia.org/wiki/Electronic_design_automation)
+- [VLSI (Wikipedia)](https://en.wikipedia.org/wiki/Very_Large_Scale_Integration)
+- [System-on-a-chip (Wikipedia)](https://en.wikipedia.org/wiki/System-on-a-chip)
+- [Yosys Open Source Suite (Wikipedia)](https://en.wikipedia.org/wiki/Yosys_(software))
+- [nextpnr (Wikipedia)](https://en.wikipedia.org/wiki/nextpnr)
 - LaLlement, J., & Al. (2020). "The Democratization of FPGA Development." _Communications of the ACM_, 63(5), 44--46. 討論開源 FPGA 工具鏈對產業與教育的影響。

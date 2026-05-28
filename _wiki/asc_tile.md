@@ -435,3 +435,9 @@ CRC-32 計算僅涵蓋 CRAM 資料部分（不含前導空白與位元數標頭�
 - ASC 輸出：`v2f-pnr/src/asc_out.rs`
 - 架構網格：`v2f-pnr/src/arch.rs`
 - ASC Fixture 檔案：`v2f-bitstream/_fixtures/minimal_hx1k.asc`、`v2f-bitstream/_fixtures/empty_hx1k.asc`
+
+## 延伸閱讀
+
+- [Place and Route (Wikipedia)](https://en.wikipedia.org/wiki/Place_and_route)
+- [FPGA (Wikipedia)](https://en.wikipedia.org/wiki/Field-programmable_gate_array)
+- [Routing (Electronic Design) (Wikipedia)](https://en.wikipedia.org/wiki/Routing_(electronic_design))

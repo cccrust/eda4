@@ -187,14 +187,37 @@ fn main() {
                 cmd_save_plot(&circuit, filename, node);
             }
             "cir" => {
-                if let Some(path) = args.get(2) {
-                    match fs::read_to_string(path) {
+                let mut path: Option<String> = None;
+                let mut svg_file: Option<&str> = None;
+                let args_slice = &args[2..];
+
+                for (i, arg) in args_slice.iter().enumerate() {
+                    if *arg == "--svg" && i + 1 < args_slice.len() {
+                        svg_file = Some(&args_slice[i + 1]);
+                    } else if arg.starts_with("--svg=") {
+                        svg_file = Some(arg.trim_start_matches("--svg="));
+                    } else if !arg.starts_with('-') && path.is_none() {
+                        path = Some(arg.clone());
+                    }
+                }
+
+                if let Some(p) = path {
+                    let p_display = p.clone();
+                    match fs::read_to_string(&p) {
                         Ok(content) => {
-                            println!("Loading: {}", path);
+                            println!("Loading: {}", p_display);
                             match parse_spice(&content) {
                                 Ok(c) => {
                                     let opts = AnalysisOptions::default();
                                     run_analysis(&c, &opts);
+                                    if let Some(svg_path) = svg_file {
+                                        let svg = visualization::svg_circuit(&c);
+                                        if let Err(e) = fs::write(svg_path, svg) {
+                                            eprintln!("Error saving SVG: {}", e);
+                                        } else {
+                                            println!("Circuit diagram saved to {}", svg_path);
+                                        }
+                                    }
                                 }
                                 Err(e) => eprintln!("Parse error: {}", e),
                             }
@@ -202,7 +225,8 @@ fn main() {
                         Err(e) => eprintln!("Error reading file: {}", e),
                     }
                 } else {
-                    println!("Usage: ruspice cir <file.cir>");
+                    println!("Usage: ruspice cir <file.cir> [--svg <output.svg>]");
+                    println!("  --svg <file>  Save circuit diagram as SVG");
                 }
             }
             "list" => {

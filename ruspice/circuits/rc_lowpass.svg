@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+<style>
+    .wire { stroke: #333; stroke-width: 2; fill: none; }
+    .component { stroke: #006; stroke-width: 2; fill: none; }
+    .label { font-family: monospace; font-size: 12px; fill: #333; }
+    .node { fill: #333; }
+</style>
+<text x="10" y="20" class="label">Circuit: SPICE Netlist</text>
+<text x="10" y="380" class="label">Nodes: 3 | Components: 3</text>
+  <line x1="517" y1="237" x2="550" y2="300" class="wire"/>
+  <text x="533" y="259" class="label" text-anchor="middle">V1 = 0.00</text>
+  <circle cx="533" cy="269" r="10" class="component"/>
+  <text x="548" y="264" class="label">+0V</text>
+  <line x1="517" y1="237" x2="83" y2="238" class="wire"/>
+  <text x="300" y="228" class="label" text-anchor="middle">R1 = 1000.00</text>
+  <path d="M 517,237 L 83,238" class="component"/>
+  <text x="300" y="252" class="label">1000Ω</text>
+  <line x1="83" y1="238" x2="550" y2="300" class="wire"/>
+  <text x="317" y="259" class="label" text-anchor="middle">C1 = 0.00</text>
+  <line x1="83" y1="238" x2="550" y2="300" class="wire"/>
+  <line x1="309" y1="261" x2="309" y2="277" class="component"/>
+  <line x1="325" y1="261" x2="325" y2="277" class="component"/>
+  <text x="317" y="294" class="label">0.00000010000000000000001F</text>
+</svg>

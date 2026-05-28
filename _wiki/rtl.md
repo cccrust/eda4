@@ -582,3 +582,11 @@ RTL 編碼（RTL Coding）
 ```
 
 RTL 是這個流程中最關鍵的一環：上接架構設計，下接合成與實體實現。RTL 的品質直接決定了最終晶片的效能、面積與功耗。掌握 RTL 設計是數位積體電路設計工程師的核心技能，也是 eda4 專案中 verilog2fpga 與 verilog2rust 兩條工具鏈的共同起點。
+
+## 延伸閱讀
+
+- [RTL - Register-Transfer Level (Wikipedia)](https://en.wikipedia.org/wiki/Register-transfer_level)
+- [Digital Electronics (Wikipedia)](https://en.wikipedia.org/wiki/Digital_electronics)
+- [Synchronous Circuit (Wikipedia)](https://en.wikipedia.org/wiki/Synchronous_circuit)
+- [Finite State Machine (Wikipedia)](https://en.wikipedia.org/wiki/Finite-state_machine)
+- [Datapath (Wikipedia)](https://en.wikipedia.org/wiki/Datapath)

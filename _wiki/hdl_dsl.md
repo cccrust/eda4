@@ -327,3 +327,10 @@ v2f_rust::to_verilog(&module)  // 轉 Verilog
 - **表達式限制**：`+` `-` `&` `|` `^` `~` 以外的運算元（乘法、移位、比較）尚未實作
 - **手寫解析器**：`fpga!` 巨集使用手寫的 `Cursor` 解析器而非 `syn`/`nom` 等函式庫，遇到複雜語法時較難擴充
 - **always 區塊僅一個敏感信號**：`always(posedge clk)` 只支援單一邊緣觸發，不支援 `posedge clk or negedge rst`
+
+## 延伸閱讀
+
+- [Domain-Specific Language (Wikipedia)](https://en.wikipedia.org/wiki/Domain-specific_language)
+- [Hardware Description Language (Wikipedia)](https://en.wikipedia.org/wiki/Hardware_description_language)
+- [Embedded Domain-Specific Language (Wikipedia)](https://en.wikipedia.org/wiki/Embedded_domain-specific_language)
+- [Macro (Computer Science) (Wikipedia)](https://en.wikipedia.org/wiki/Macro_(computer_science))

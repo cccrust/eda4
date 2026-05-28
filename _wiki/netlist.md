@@ -294,3 +294,10 @@ Yosys-JSON 格式與 v2f-synth 皆採用 little-endian 的位元順序，亦即�
 當 Yosys-JSON 序列化時，埠的 `bits` 陣列也遵循此順序。例如 4 位元輸入埠的 `"bits": [5, 6, 7, 8]` 表示 bit 0（LSB）對應 BitId 5，bit 3（MSB）對應 BitId 8。
 
 這種慣例與 iCE40 實體元件的接腳對應方式一致，也與 Verilog 語言中 `[3:0]` 宣告的位元索引方式相符。保持一致的位元順序對於確保工具鏈各階段之間資料的一致性至關重要：如果合成階段與 PNR 階段對位元順序的理解不一致，將導致電路功能錯誤。
+
+## 延伸閱讀
+
+- [Netlist (Wikipedia)](https://en.wikipedia.org/wiki/Netlist)
+- [Yosys (Wikipedia)](https://en.wikipedia.org/wiki/Yosys_(software))
+- [Logic Synthesis (Wikipedia)](https://en.wikipedia.org/wiki/Logic_synthesis)
+- [Boolean Algebra (Wikipedia)](https://en.wikipedia.org/wiki/Boolean_algebra)

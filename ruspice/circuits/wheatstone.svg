@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+<style>
+    .wire { stroke: #333; stroke-width: 2; fill: none; }
+    .component { stroke: #006; stroke-width: 2; fill: none; }
+    .label { font-family: monospace; font-size: 12px; fill: #333; }
+    .node { fill: #333; }
+</style>
+<text x="10" y="20" class="label">Circuit: SPICE Netlist</text>
+<text x="10" y="380" class="label">Nodes: 4 | Components: 6</text>
+  <line x1="300" y1="300" x2="550" y2="300" class="wire"/>
+  <text x="425" y="290" class="label" text-anchor="middle">V1 = 10.00</text>
+  <circle cx="425" cy="300" r="10" class="component"/>
+  <text x="440" y="295" class="label">+10V</text>
+  <line x1="300" y1="300" x2="300" y2="50" class="wire"/>
+  <text x="300" y="165" class="label" text-anchor="middle">R1 = 100.00</text>
+  <path d="M 300,300 L 300,50" class="component"/>
+  <text x="300" y="190" class="label">100Ω</text>
+  <line x1="300" y1="50" x2="550" y2="300" class="wire"/>
+  <text x="425" y="165" class="label" text-anchor="middle">R2 = 100.00</text>
+  <path d="M 300,50 L 550,300" class="component"/>
+  <text x="425" y="190" class="label">100Ω</text>
+  <line x1="300" y1="300" x2="50" y2="175" class="wire"/>
+  <text x="175" y="228" class="label" text-anchor="middle">R3 = 100.00</text>
+  <path d="M 300,300 L 50,175" class="component"/>
+  <text x="175" y="252" class="label">100Ω</text>
+  <line x1="50" y1="175" x2="550" y2="300" class="wire"/>
+  <text x="300" y="228" class="label" text-anchor="middle">R4 = 100.00</text>
+  <path d="M 50,175 L 550,300" class="component"/>
+  <text x="300" y="252" class="label">100Ω</text>
+  <line x1="300" y1="50" x2="50" y2="175" class="wire"/>
+  <text x="175" y="103" class="label" text-anchor="middle">RL = 1000.00</text>
+  <path d="M 300,50 L 50,175" class="component"/>
+  <text x="175" y="128" class="label">1000Ω</text>
+</svg>

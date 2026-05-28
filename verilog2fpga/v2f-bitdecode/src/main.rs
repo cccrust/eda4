@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::Parser;
 
 use v2f_bitdecode::bin_parse::parse_bin;
-use v2f_bitdecode::cram_decode::decode_cram;
+use v2f_bitdecode::cram_decode::{decode_cram, decode_synckey};
 use v2f_bitdecode::json_out::tiles_to_json;
 
 #[derive(Parser)]
@@ -34,8 +34,12 @@ fn main() {
             std::process::exit(1);
         }
     };
+    let synckey = decode_synckey(&bin.cram);
     let tiles = decode_cram(&bin.cram, bin.device);
-    let json = tiles_to_json(&tiles, bin.device, cli.input.to_str().unwrap(), bin.crc_valid);
+    let json = tiles_to_json(
+        &tiles, bin.device, cli.input.to_str().unwrap(), bin.crc_valid,
+        Some(synckey), "wiring",
+    );
     let output = if cli.pretty {
         serde_json::to_string_pretty(&json)
     } else {

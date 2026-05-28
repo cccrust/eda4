@@ -262,3 +262,10 @@ FPGA 架構具有獨特的離散性和規律性，使模擬退火成為佈局的
 - Metropolis, N., Rosenbluth, A. W., Rosenbluth, M. N., Teller, A. H., & Teller, E. (1953). Equation of State Calculations by Fast Computing Machines. The Journal of Chemical Physics, 21(6), 1087–1092.
 - Betz, V., Rose, J., & Marquardt, A. (1999). Architecture and CAD for Deep-Submicron FPGAs. Kluwer Academic Publishers.
 - Sechen, C., & Sangiovanni-Vincentelli, A. (1985). The TimberWolf placement and routing package. IEEE Journal of Solid-State Circuits, 20(2), 510–522.
+
+## 延伸閱讀
+
+- [Simulated Annealing (Wikipedia)](https://en.wikipedia.org/wiki/Simulated_annealing)
+- [Optimization (Wikipedia)](https://en.wikipedia.org/wiki/Optimization)
+- [Metaheuristic (Wikipedia)](https://en.wikipedia.org/wiki/Metaheuristic)
+- [VLSI Placement (Wikipedia)](https://en.wikipedia.org/wiki/Place_and_route#Placement)

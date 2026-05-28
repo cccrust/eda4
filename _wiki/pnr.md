@@ -340,3 +340,10 @@ run_pnr(json_str, device)
 - [iCE40 架構](ice40.md) — PNR 目標平台的硬體架構
 - [ASC 格式 / 磚塊架構](asc_tile.md) — PNR 的輸出格式
 - [CRAM / Frame / 位元流](cram_bitstream.md) — PNR 的後續階段
+
+## 延伸閱讀
+
+- [Place and Route (Wikipedia)](https://en.wikipedia.org/wiki/Place_and_route)
+- [Electronic Design Automation (Wikipedia)](https://en.wikipedia.org/wiki/Electronic_design_automation)
+- [FPGA Place and Route (Wikipedia)](https://en.wikipedia.org/wiki/Field-programmable_gate_array#Design)
+- [Timing Closure (Wikipedia)](https://en.wikipedia.org/wiki/Timing_closure)

@@ -337,3 +337,9 @@ eda4 的 v2f-pnr crate 針對 iCE40 的固定拼貼網格進行簡單的擺置�
 ## 結論
 
 平面規劃和電源分配網路設計是決定晶片能否成功的關鍵步驟。一個不良的平面規劃會導致繞線擁塞、時序違規、IR drop 過大，甚至使晶片完全無法工作。隨著製程持續微縮到 3nm 以下，電源完整性、熱管理和製程變異的挑戰日益嚴峻，平面規劃的重要性只會有增無減。在 eda4 專案中，v2f-pnr 針對 iCE40 這類相對簡單的 FPGA 架構進行擺置，雖然目前尚未實作完整的平面規劃功能，但對於理解實體設計的基本原理提供了紮實的入門基礎。此外，edp-gr (v2f-pnr 中的繞線器) 在處理 iCE40 的固定拼貼網格時，其整體流程也間接反映了平面規劃的關鍵取捨：在固定的資源佈局下，如何透過最佳化演算法達到最小的線長和可接受的擁塞程度。
+
+## 延伸閱讀
+
+- [Floorplan (Wikipedia)](https://en.wikipedia.org/wiki/Floorplan_(electronics))
+- [Power Distribution Network (Wikipedia)](https://en.wikipedia.org/wiki/Power_distribution_network)
+- [IR Drop (Wikipedia)](https://en.wikipedia.org/wiki/Electronic_design_automation)

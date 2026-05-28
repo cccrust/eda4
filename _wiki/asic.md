@@ -373,3 +373,11 @@ eda4 專案主要開發的是純 Rust 實作的 FPGA 工具鏈（verilog2fpga）
 - 以 mm² 為單位，直接影響成本和良率
 - 面積利用率：標準細胞約 70-90%，全客製約 90%+
 - 成本約與面積成反比（相同製程條件下）
+
+## 延伸閱讀
+
+- [ASIC - Application-Specific Integrated Circuit (Wikipedia)](https://en.wikipedia.org/wiki/Application-specific_integrated_circuit)
+- [Integrated Circuit (Wikipedia)](https://en.wikipedia.org/wiki/Integrated_circuit)
+- [Full Custom IC Design (Wikipedia)](https://en.wikipedia.org/wiki/Full_custom)
+- [Standard Cell (Wikipedia)](https://en.wikipedia.org/wiki/Standard_cell)
+- [Tape-out (Wikipedia)](https://en.wikipedia.org/wiki/Tape-out)

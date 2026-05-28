@@ -362,3 +362,9 @@ compress [-l]             # 壓縮網路
 - Rudell, R. L. "Multiple-Valued Logic Minimization for PLA Synthesis." UCB/ERL M86/65, UC Berkeley, 1986.
 - Sentovich, E. M., et al. "SIS: A System for Sequential Circuit Synthesis." UCB/ERL M92/41, UC Berkeley, 1992.
 - Hachtel, G. D. and Somenzi, F. *Logic Synthesis and Verification Algorithms*. Kluwer Academic Publishers, 1996.
+
+## 延伸閱讀
+
+- [Boolean Function (Wikipedia)](https://en.wikipedia.org/wiki/Boolean_function)
+- [Logic Synthesis (Wikipedia)](https://en.wikipedia.org/wiki/Logic_synthesis)
+- [Karnaugh Map (Wikipedia)](https://en.wikipedia.org/wiki/Karnaugh_map)

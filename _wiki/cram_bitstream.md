@@ -387,3 +387,10 @@ Verilog (.v) -> v2f-synth (合成) -> JSON netlist
 - Lattice iCE40 UltraPlus Family Data Sheet (DS1048)
 - eda4 原始碼: verilog2fpga/v2f-bitstream/src/
 - eda4 原始碼: verilog2fpga/v2f-db/src/
+
+## 延伸閱讀
+
+- [Bitstream (Wikipedia)](https://en.wikipedia.org/wiki/Bitstream)
+- [Configuration Memory (Wikipedia)](https://en.wikipedia.org/wiki/Configuration_memory)
+- [FPGA Configuration (Wikipedia)](https://en.wikipedia.org/wiki/Field-programmable_gate_array#Configuration)
+- [SRAM (Wikipedia)](https://en.wikipedia.org/wiki/Static_random-access_memory)

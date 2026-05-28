@@ -279,3 +279,9 @@ RTL-to-GDSII 是 ASIC 設計流程的總稱，描述從行為層級的暫存器�
 3. **驗證層（Verification）**：確保每個階段的轉換都是正確的
 
 OpenLANE 實現了上述所有階段的自動化轉換，是當前最成熟的開源 RTL-to-GDSII 解決方案。
+
+## 延伸閱讀
+
+- [Application-Specific Integrated Circuit (Wikipedia)](https://en.wikipedia.org/wiki/Application-specific_integrated_circuit)
+- [GDSII (Wikipedia)](https://en.wikipedia.org/wiki/GDSII)
+- [Open-source Silicon (Wikipedia)](https://en.wikipedia.org/wiki/Open-source_silicon)

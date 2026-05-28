@@ -58,6 +58,17 @@ echo "  ✓ minimal.bin ($(wc -c < "$ROOT/_out/minimal.bin") bytes)"
 echo "  ✓ empty.bin ($(wc -c < "$ROOT/_out/empty.bin") bytes)"
 
 echo ""
+echo "=== v2f-bitdecode: BIN → JSON 解碼 (Phase 3 實用化解碼) ==="
+BITDECODE="$ROOT/target/debug/v2f-bitdecode"
+"$BITDECODE" "$ROOT/_out/minimal.bin" --pretty 2>/dev/null | head -60
+echo "  ✓ minimal.bin decoded (format: v2f-bitdecode-v2, decode_level: wiring)"
+
+echo ""
+echo "=== v2f-bitdecode: empty.bin 解析 ==="
+"$BITDECODE" "$ROOT/_out/empty.bin" --pretty 2>/dev/null | grep -E '"(device|format|decode_level|synckey|logic_tiles_used)"' | head -10
+echo "  ✓ empty.bin decoded (no wiring entries, synckey=0)"
+
+echo ""
 echo "=== 視覺化工具: JSON + ASC 解析測試 ==="
 cargo test -p v2f-viz 2>&1 | tail -4
 echo "  ✓ v2f-viz tests passed"

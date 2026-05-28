@@ -386,3 +386,10 @@ v2f-pnr 的 A* 繞線在大學課程等級的設計（如 MCU0m、hackcpu）中�
 - Dechter, R., & Pearl, J. (1985). Generalized Best-First Search Strategies and the Optimality of A*. Journal of the ACM, 32(3), 505–536.
 - Betz, V., Rose, J., & Marquardt, A. (1999). Architecture and CAD for Deep-Submicron FPGAs. Kluwer Academic Publishers.
 - Chu, C., & Wong, Y. C. (2007). FLUTE: Fast Lookup Table Based Rectilinear Steiner Minimal Tree Algorithm for VLSI Design. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, 27(1), 70–83.
+
+## 延伸閱讀
+
+- [A* Search Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/A*_search_algorithm)
+- [Shortest Path Problem (Wikipedia)](https://en.wikipedia.org/wiki/Shortest_path_problem)
+- [Dijkstra's Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Dijkstra's_algorithm)
+- [Graph Theory (Wikipedia)](https://en.wikipedia.org/wiki/Graph_theory)

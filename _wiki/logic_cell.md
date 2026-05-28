@@ -435,3 +435,9 @@ Verilog → AST → Netlist (CellKind::Lut) → ICESTORM_LC → ASC → CRAM →
 ```
 
 理解 Logic Cell 的內部結構對於 FPGA 開發者最佳化設計、理解面積約束、以及除錯時序問題至關重要。
+
+## 延伸閱讀
+
+- [Look-up Table (Wikipedia)](https://en.wikipedia.org/wiki/Look-up_table)
+- [Flip-flop (Wikipedia)](https://en.wikipedia.org/wiki/Flip-flop_(electronics))
+- [Carry Lookahead Adder (Wikipedia)](https://en.wikipedia.org/wiki/Carry_lookahead_adder)

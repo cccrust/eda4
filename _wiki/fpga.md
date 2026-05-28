@@ -227,4 +227,11 @@ eda4 採用 monorepo 結構，包含四條核心管線：
 
 ### 貢獻
 
-eda4 專案歡迎貢獻者參與合成器最佳化、新增 iCE40 變體支援、PnR 演算法改進、以及測試案例擴充。開發方向包括全形式化驗證支援、更詳盡的時序分析、以及對 Lattice ECP5 系列的工具鏈擴展。
+ eda4 專案歡迎貢獻者參與合成器最佳化、新增 iCE40 變體支援、PnR 演算法改進、以及測試案例擴充。開發方向包括全形式化驗證支援、更詳盡的時序分析、以及對 Lattice ECP5 系列的工具鏈擴展。
+
+## 延伸閱讀
+
+- [FPGA - Field-Programmable Gate Array (Wikipedia)](https://en.wikipedia.org/wiki/Field-programmable_gate_array)
+- [Lattice iCE40 (Wikipedia)](https://en.wikipedia.org/wiki/Lattice_iCE40)
+- [IceStorm (Wikipedia)](https://en.wikipedia.org/wiki/Project_Icestorm)
+- [FPGA Design Methodology (Wikipedia)](https://en.wikipedia.org/wiki/FPGA#Design)

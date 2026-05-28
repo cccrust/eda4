@@ -348,3 +348,10 @@ eda4 的 verilog2rust 合成器將 Verilog 程式碼轉換為 Rust HDL 表示。
 **位元流驗證**：雖然位元流層級的等效性檢查在實務上較少執行，但對於安全關鍵的 FPGA 應用（航太、醫療、軍事），可以透過形式驗證確保實現結果與設計意圖完全一致。這通常涉及將位元流反解譯為 LUT 內容與 FF 連接，再與原始 RTL 進行比對。
 
 隨著開源 FPGA 工具鏈（Yosys、nextpnr、SymbiYosys）的成熟，形式驗證正在從 ASIC 領域向 FPGA 領域擴展，為開放式硬體設計提供了更高層次的正確性保證。
+
+## 延伸閱讀
+
+- [Formal Verification (Wikipedia)](https://en.wikipedia.org/wiki/Formal_verification)
+- [Model Checking (Wikipedia)](https://en.wikipedia.org/wiki/Model_checking)
+- [Boolean Satisfiability Problem (Wikipedia)](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem)
+- [Equivalence Checking (Wikipedia)](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem#Applications)

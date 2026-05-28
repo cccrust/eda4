@@ -296,3 +296,9 @@ function QM(minterms, num_vars):
 - McCluskey, E. J. "Minimization of Boolean Functions." *Bell System Technical Journal*, vol. 35, no. 6, 1956, pp. 1417-1444.
 - McCluskey, E. J. *Logic Design Principles*. Prentice-Hall, 1986.
 - Hachtel, G. D. and Somenzi, F. *Logic Synthesis and Verification Algorithms*. Kluwer Academic Publishers, 1996.
+
+## 延伸閱讀
+
+- [Quine–McCluskey Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Quine%E2%80%93McCluskey_algorithm)
+- [Boolean Logic (Wikipedia)](https://en.wikipedia.org/wiki/Boolean_logic)
+- [Karnaugh Map (Wikipedia)](https://en.wikipedia.org/wiki/Karnaugh_map)

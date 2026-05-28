@@ -272,3 +272,9 @@ Retiming 可以改變內部暫存器的位置，但不能改變電路**介面**�
 ### 時序不變性僅限於功能
 
 Retiming 保證電路的功能正確，但不會保留電路的**時序細節**（如輸入輸出延遲的時脈週期數）。對於需要精確時脈週期數的設計（如某些通訊協定），retiming 後的電路可能需要重新驗證時序。
+
+## 延伸閱讀
+
+- [Retiming (Wikipedia)](https://en.wikipedia.org/wiki/Retiming)
+- [Sequential Circuit (Wikipedia)](https://en.wikipedia.org/wiki/Sequential_circuit)
+- [Clock Signal (Wikipedia)](https://en.wikipedia.org/wiki/Clock_signal)

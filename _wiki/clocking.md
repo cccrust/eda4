@@ -396,3 +396,10 @@ iCE40 系列提供多條全球時脈網路（global clock networks），可以�
 - C. E. Cummings, "Clock Domain Crossing (CDC) Design & Verification Techniques", SNUG 2008
 - Synopsys, *PrimeTime User Guide: Clock Tree Synthesis Analysis*
 - N. H. E. Weste, D. Harris, *CMOS VLSI Design: A Circuits and Systems Perspective*, 4th Edition, Addison-Wesley, 2011
+
+## 延伸閱讀
+
+- [Clock Signal (Wikipedia)](https://en.wikipedia.org/wiki/Clock_signal)
+- [Phase-Locked Loop (Wikipedia)](https://en.wikipedia.org/wiki/Phase-locked_loop)
+- [Clock Distribution Network (Wikipedia)](https://en.wikipedia.org/wiki/Clock_distribution_network)
+- [Metastability (Wikipedia)](https://en.wikipedia.org/wiki/Metastability_(electronics))

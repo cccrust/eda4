@@ -100,6 +100,5 @@ run_analysis(&circuit, &opts);
 ## Notes
 
 - Ground node is always `gnd` (node 0)
-- Phase in AC analysis currently shows 90° due to simplified complex handling (real admittance model)
-- AC magnitude is correct for RC/RL circuits
+- AC analysis uses full complex arithmetic (num-complex) with proper magnitude and phase
 - Transient analysis uses backward Euler integration

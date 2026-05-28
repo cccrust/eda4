@@ -351,3 +351,10 @@ DFT 是現代晶片設計中不可或缺的一環。從基礎的 stuck-at 故障
 - Lattice Semiconductor, *iCE40 Programming and Configuration Technical Note* (FPGA-TN-02002)
 - N. K. Jha, S. Gupta, *Testing of Digital Systems*, Cambridge University Press, 2003
 - E. J. McCluskey, *Logic Design Principles with Emphasis on Testable Semicustom Circuits*, Prentice Hall, 1986
+
+## 延伸閱讀
+
+- [Design for Testability (Wikipedia)](https://en.wikipedia.org/wiki/Design_for_testability)
+- [Scan Test (Wikipedia)](https://en.wikipedia.org/wiki/Scan_test)
+- [ATPG (Wikipedia)](https://en.wikipedia.org/wiki/Automatic_test_pattern_generation)
+- [JTAG (Wikipedia)](https://en.wikipedia.org/wiki/JTAG)

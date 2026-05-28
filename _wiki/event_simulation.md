@@ -346,3 +346,9 @@ self.eval();  // 收斂組合邏輯
 ```
 
 對於含觸發器的設計，則會使用 `Sim::posedge()` / `Sim::tick()` 來驅動時脈。
+
+## 延伸閱讀
+
+- [Event-Driven Simulation (Wikipedia)](https://en.wikipedia.org/wiki/Event-driven_simulation)
+- [Digital Electronics (Wikipedia)](https://en.wikipedia.org/wiki/Digital_electronics)
+- [Logic Gate (Wikipedia)](https://en.wikipedia.org/wiki/Logic_gate)

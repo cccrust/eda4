@@ -299,3 +299,9 @@ eda4 專案主要聚焦於 iCE40 FPGA 的純 Rust EDA 工具鏈，包括邏輯�
 - 時序分析（STA）在 FPGA 與 ASIC 流程中同樣關鍵，而標準單元的時序模型是 STA 的基礎
 
 eda4 的 v2f-synth 模組負責將 Verilog 合成為 I/O 邏輯區塊間的連接網表，類似於 ASIC 流程中將 RTL 映射到標準單元。v2f-pnr 則執行模擬退火佈局繞線，雖然架構不同（FPGA 互連盒 vs. 標準單元繞線通道），但核心目標一致：在面積與時序約束下完成自動化實體實現。
+
+## 延伸閱讀
+
+- [Standard Cell (Wikipedia)](https://en.wikipedia.org/wiki/Standard_cell)
+- [ASIC (Wikipedia)](https://en.wikipedia.org/wiki/Application-specific_integrated_circuit)
+- [Cell Library (Wikipedia)](https://en.wikipedia.org/wiki/Standard_cell#Cell_library)

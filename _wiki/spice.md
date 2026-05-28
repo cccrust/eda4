@@ -330,3 +330,9 @@ FinFET 與 GAA（Gate-All-Around，如三星 3nm 的 MBCFET、台積電的奈米
 - **智能取樣**：在蒙地卡羅分析中使用主動學習策略，以更少的模擬次數達到所需的統計準確度
 
 SPICE 作為 EDA 領域最基礎的工具之一，雖然已經發展了半個世紀，但仍在持續演進，持續支撐著摩爾定律時代的積體電路設計。
+
+## 延伸閱讀
+
+- [SPICE (Wikipedia)](https://en.wikipedia.org/wiki/SPICE)
+- [Transistor (Wikipedia)](https://en.wikipedia.org/wiki/Transistor)
+- [Electronic Circuit Simulation (Wikipedia)](https://en.wikipedia.org/wiki/Electronic_circuit_simulation)

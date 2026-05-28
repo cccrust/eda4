@@ -195,3 +195,9 @@ FPGA 的繞線圖通常不是簡單的二維網格——不同長度的 wire seg
 - `v2f-pnr` 的 A\*：BFS + 曼哈頓距離啟發式，同樣保證最短路徑（因為啟發式是可容許的），但探索效率高得多
 
 在 FPGA 繞線的實際應用中，探索效率比絕對最短路徑長度更重要，因為 FPGA 的繞線資源充足，路徑長几個 tile 的差異不大，但搜尋速度的差距卻可能高達數倍。因此 `v2f-pnr` 選擇了 A\* 作為核心繞線演算法。
+
+## 延伸閱讀
+
+- [Lee Algorithm (Wikipedia)](https://en.wikipedia.org/wiki/Lee_algorithm)
+- [Breadth-first Search (Wikipedia)](https://en.wikipedia.org/wiki/Breadth-first_search)
+- [Maze (Wikipedia)](https://en.wikipedia.org/wiki/Maze)

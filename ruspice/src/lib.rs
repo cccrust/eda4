@@ -286,8 +286,10 @@ impl Solver {
                 .count();
             let total_unknowns = n - 1 + num_v_sources;
 
-            let mut gm = DMatrix::zeros(total_unknowns, total_unknowns);
-            let mut rhs = DVector::zeros(total_unknowns);
+            let mut y_re: DMatrix<f64> = DMatrix::zeros(total_unknowns, total_unknowns);
+            let mut y_im: DMatrix<f64> = DMatrix::zeros(total_unknowns, total_unknowns);
+            let mut i_re: DVector<f64> = DVector::zeros(total_unknowns);
+            let mut i_im: DVector<f64> = DVector::zeros(total_unknowns);
 
             for comp in &self.circuit.components {
                 match comp.component_type {
@@ -297,60 +299,63 @@ impl Solver {
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         if comp.node_pos != self.circuit.ground {
-                            gm[(n1, n1)] += g;
+                            y_re[(n1, n1)] += g;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            gm[(n2, n2)] += g;
+                            y_re[(n2, n2)] += g;
                         }
                         if comp.node_pos != self.circuit.ground && comp.node_neg != self.circuit.ground {
-                            gm[(n1, n2)] -= g;
-                            gm[(n2, n1)] -= g;
+                            y_re[(n1, n2)] -= g;
+                            y_re[(n2, n1)] -= g;
                         }
                     }
                     ComponentType::Capacitor => {
-                        let g = omega * comp.value;
+                        let b = omega * comp.value;
                         let n1 = if comp.node_pos == self.circuit.ground { 0 } else { comp.node_pos - 1 };
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         if comp.node_pos != self.circuit.ground {
-                            gm[(n1, n1)] += g;
+                            y_im[(n1, n1)] += b;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            gm[(n2, n2)] += g;
+                            y_im[(n2, n2)] += b;
                         }
                         if comp.node_pos != self.circuit.ground && comp.node_neg != self.circuit.ground {
-                            gm[(n1, n2)] -= g;
-                            gm[(n2, n1)] -= g;
+                            y_im[(n1, n2)] -= b;
+                            y_im[(n2, n1)] -= b;
                         }
                     }
                     ComponentType::Inductor => {
-                        let g = 1.0 / (omega * comp.value);
+                        let b = 1.0 / (omega * comp.value);
                         let n1 = if comp.node_pos == self.circuit.ground { 0 } else { comp.node_pos - 1 };
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         if comp.node_pos != self.circuit.ground {
-                            gm[(n1, n1)] += g;
+                            y_im[(n1, n1)] -= b;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            gm[(n2, n2)] += g;
+                            y_im[(n2, n2)] -= b;
                         }
                         if comp.node_pos != self.circuit.ground && comp.node_neg != self.circuit.ground {
-                            gm[(n1, n2)] -= g;
-                            gm[(n2, n1)] -= g;
+                            y_im[(n1, n2)] += b;
+                            y_im[(n2, n1)] += b;
                         }
                     }
-ComponentType::CurrentSource => {
+                    ComponentType::CurrentSource => {
                         let amp = if comp.ac_amplitude > 0.0 { comp.ac_amplitude } else { comp.value };
                         let phase = comp.ac_phase.to_radians();
                         let n1 = if comp.node_pos == self.circuit.ground { 0 } else { comp.node_pos - 1 };
                         let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                         let re = amp * phase.cos();
+                        let im = amp * phase.sin();
                         if comp.node_pos != self.circuit.ground {
-                            rhs[n1] -= re;
+                            i_re[n1] -= re;
+                            i_im[n1] -= im;
                         }
                         if comp.node_neg != self.circuit.ground {
-                            rhs[n2] += re;
+                            i_re[n2] += re;
+                            i_im[n2] += im;
                         }
                     }
                     _ => {}
@@ -366,32 +371,52 @@ ComponentType::CurrentSource => {
                     let n2 = if comp.node_neg == self.circuit.ground { 0 } else { comp.node_neg - 1 };
 
                     if comp.node_pos != self.circuit.ground {
-                        gm[(n1, vs_idx)] = 1.0;
-                        gm[(vs_idx, n1)] = 1.0;
+                        y_re[(n1, vs_idx)] = 1.0;
+                        y_re[(vs_idx, n1)] = 1.0;
                     }
                     if comp.node_neg != self.circuit.ground {
-                        gm[(n2, vs_idx)] = -1.0;
-                        gm[(vs_idx, n2)] = -1.0;
+                        y_re[(n2, vs_idx)] = -1.0;
+                        y_re[(vs_idx, n2)] = -1.0;
                     }
-                    rhs[vs_idx] = amp * phase.cos();
+                    i_re[vs_idx] = amp * phase.cos();
+                    i_im[vs_idx] = amp * phase.sin();
                     vs_idx += 1;
                 }
             }
 
-            let voltages = match gm.clone().try_inverse() {
-                Some(inv) => inv * rhs,
+            let size = total_unknowns;
+            let mut a = DMatrix::zeros(2 * size, 2 * size);
+            let mut b = DVector::zeros(2 * size);
+
+            for i in 0..size {
+                for j in 0..size {
+                    a[(i, j)] = y_re[(i, j)];
+                    a[(i, j + size)] = -y_im[(i, j)];
+                    a[(i + size, j)] = y_im[(i, j)];
+                    a[(i + size, j + size)] = y_re[(i, j)];
+                }
+            }
+            for i in 0..size {
+                b[i] = i_re[i];
+                b[i + size] = i_im[i];
+            }
+
+            let x = match a.clone().try_inverse() {
+                Some(inv) => inv * b,
                 None => {
-                    let lu = gm.lu();
-                    lu.solve(&rhs).unwrap_or_else(|| DVector::zeros(total_unknowns))
+                    let lu = a.lu();
+                    lu.solve(&b).unwrap_or_else(|| DVector::zeros(2 * size))
                 }
             };
 
             let mut mag = Vec::new();
             let mut ph = Vec::new();
             for i in 0..n {
-                let v = if i == 0 { 0.0 } else { voltages[i - 1] };
-                let v_mag = v.abs();
-                let v_phase = v.atan2(0.0);
+                let v_re = if i == 0 { 0.0 } else { x[i - 1] };
+                let v_im = if i == 0 { 0.0 } else { x[i - 1 + size] };
+                let v = Complex64::new(v_re, v_im);
+                let v_mag = v.norm();
+                let v_phase = v.arg();
                 mag.push(v_mag);
                 ph.push(v_phase);
             }

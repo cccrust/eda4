@@ -511,3 +511,11 @@ verilog2rust 的執行流程如下：
 ## 結語
 
 Verilog 作為 IEEE 標準的硬體描述語言，已經在數位電路設計領域累積超過三十年的使用歷史。從 ASIC 到 FPGA、從簡單的狀態機到複雜的系統單晶片，Verilog 始終是硬體工程師描述和驗證設計的核心工具。eda4 專案透過 verilog2fpga 和 verilog2rust 兩個子專案，從 Rust 生態系統的角度重新詮釋了 Verilog——前者實現了純 Rust 的 FPGA 合成工具鏈，後者則搭建了 Verilog 與 Rust 軟體世界之間的橋樑。這樣的設計不僅為硬體設計提供了新的工具選擇，也為 Rust 在 EDA 領域的應用開創了新的可能性。
+
+## 延伸閱讀
+
+- [Verilog (Wikipedia)](https://en.wikipedia.org/wiki/Verilog)
+- [VHDL (Wikipedia)](https://en.wikipedia.org/wiki/VHDL)
+- [Hardware Description Language (Wikipedia)](https://en.wikipedia.org/wiki/Hardware_description_language)
+- [IEEE 1364 (Wikipedia)](https://en.wikipedia.org/wiki/IEEE_1364)
+- [Digital Signal Processing (Wikipedia)](https://en.wikipedia.org/wiki/Digital_signal_processing)

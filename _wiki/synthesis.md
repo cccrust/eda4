@@ -334,3 +334,10 @@ v2f-synth 的 JSON 輸出設計目標是與 Yosys 的 JSON 後端格式保持相
 - `hide_name` 為 0 時表示該網路為使用者命名（如埠），為 1 時表示內部自動生成名稱
 
 v2f-synth 完全遵循上述慣例，確保與既有 Yosys 生態系工具（如 nextpnr）的相容性。
+
+## 延伸閱讀
+
+- [Logic Synthesis (Wikipedia)](https://en.wikipedia.org/wiki/Logic_synthesis)
+- [Technology Mapping (Wikipedia)](https://en.wikipedia.org/wiki/Technology_mapping)
+- [Yosys (Wikipedia)](https://en.wikipedia.org/wiki/Yosys_(software))
+- [Verilog Synthesis (Wikipedia)](https://en.wikipedia.org/wiki/Verilog#Synthesis)

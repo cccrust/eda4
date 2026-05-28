@@ -475,3 +475,10 @@ eda4 支援三種後端模式：自動（auto，優先使用 yosys/nextpnr/icepa
 - Lattice iCE40 UltraPlus Family Data Sheet (DS1048)
 - Lattice iCE40 Programming and Configuration Technical Note (TN1250)
 - eda4 原始碼: verilog2fpga/v2f-db/src/
+
+## 延伸閱讀
+
+- [Lattice iCE40 (Wikipedia)](https://en.wikipedia.org/wiki/Lattice_iCE40)
+- [Field-Programmable Gate Array (Wikipedia)](https://en.wikipedia.org/wiki/Field-programmable_gate_array)
+- [SRAM (Wikipedia)](https://en.wikipedia.org/wiki/Static_random-access_memory)
+- [Flip-Flop (Electronics) (Wikipedia)](https://en.wikipedia.org/wiki/Flip-flop_(electronics))

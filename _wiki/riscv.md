@@ -328,3 +328,9 @@ QEMU 支援多種 RISC-V 開發板與 SoC 模型，可以啟動 Linux 系統進�
 ### Verilator
 
 Verilator 是高效能的 Verilog/SystemVerilog 模擬器，可以將 HDL 編譯為 C++ 進行高速模擬。Verilator 廣泛用於 RISC-V 核心的開發與驗證流程中。
+
+## 延伸閱讀
+
+- [RISC-V (Wikipedia)](https://en.wikipedia.org/wiki/RISC-V)
+- [Instruction Set Architecture (Wikipedia)](https://en.wikipedia.org/wiki/Instruction_set_architecture)
+- [Reduced Instruction Set Computer (Wikipedia)](https://en.wikipedia.org/wiki/Reduced_instruction_set_computer)

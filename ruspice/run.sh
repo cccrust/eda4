@@ -25,11 +25,27 @@ case "$1" in
   plot-transient)
     cargo run -- plot-transient vout
     ;;
-  svg)
-    cargo run -- svg circuit.svg && echo "已產生 circuit.svg" && ls -la circuit.svg
-    ;;
   plot)
     cargo run -- save-plot transient.svg vout && echo "已產生 transient.svg" && ls -la transient.svg
+    ;;
+  list)
+    cargo run -- list
+    ;;
+  cir)
+    if [ -z "$2" ]; then
+      echo "用法: ./run.sh cir <file.cir> [--svg <output.svg>]"
+      echo "可用範例: circuits/divider.cir, circuits/rc_charge.cir, circuits/rc_lowpass.cir"
+    else
+      shift
+      cargo run -- cir "$@"
+    fi
+    ;;
+  svg)
+    if [ -z "$2" ]; then
+      cargo run -- svg circuit.svg && echo "已產生 circuit.svg" && ls -la circuit.svg
+    else
+      cargo run -- svg "$2" && echo "已產生 $2" && ls -la "$2"
+    fi
     ;;
   all)
     echo "=== 1. 執行測試 ==="
@@ -64,9 +80,11 @@ case "$1" in
     echo "  circuit   - 顯示電路圖 (ASCII)"
     echo "  plot-dc   - 繪製 DC 電壓分布"
     echo "  plot-transient - 繪製瞬態響應"
-    echo "  svg       - 匯出電路圖為 SVG"
-    echo "  plot      - 匯出瞬態圖為 SVG"
-    echo "  all       - 執行全部功能"
+    echo "  svg [file]  - 匯出電路圖為 SVG (預設 circuit.svg)"
+    echo "  plot        - 匯出瞬態圖為 SVG"
+    echo "  list        - 列出可用 .cir 範例"
+    echo "  cir <file>  - 執行 SPICE netlist (.cir 檔案)"
+    echo "  all         - 執行全部功能"
     echo "  help      - 顯示此幫助"
     ;;
   *)

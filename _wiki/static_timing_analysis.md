@@ -365,3 +365,9 @@ eda4 專案中的 v2f-pnr 模組目前實現了模擬退火基礎佈局繞線，
 ## 結語
 
 STA 是數位積體電路設計中最關鍵的驗證技術之一。無論是 ASIC 還是 FPGA，時序收斂都是設計能否成功運作的核心條件。edc4 專案雖然以 FPGA 為目標平台，但其自動化佈局繞線引擎的發展路徑必然需要納入 STA 能力，才能真正實現在純 Rust 生態中完成完整的 FPGA 設計流程。
+
+## 延伸閱讀
+
+- [Static Timing Analysis (Wikipedia)](https://en.wikipedia.org/wiki/Static_timing_analysis)
+- [Timing Closure (Wikipedia)](https://en.wikipedia.org/wiki/Timing_closure)
+- [Setup and Hold (Wikipedia)](https://en.wikipedia.org/wiki/Setup_and_hold_time)

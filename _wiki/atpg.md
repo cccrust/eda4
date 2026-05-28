@@ -286,3 +286,9 @@ SCOAP 值越高表示越難控制或觀察。在 DFT 設計中，可以針對 SC
 - **診斷 ATPG（Diagnostic ATPG）**：除了檢測故障的存在，還能定位故障的精確位置，用於良率分析（yield analysis）
 
 這些技術共同確保了現代 VLSI 晶片在量產時能以合理的成本達到所需的品質水準。
+
+## 延伸閱讀
+
+- [ATPG (Wikipedia)](https://en.wikipedia.org/wiki/Automatic_test_pattern_generation)
+- [Design for Testability (Wikipedia)](https://en.wikipedia.org/wiki/Design_for_testability)
+- [Stuck-at Fault (Wikipedia)](https://en.wikipedia.org/wiki/Stuck-at_fault)

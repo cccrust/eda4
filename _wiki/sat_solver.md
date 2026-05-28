@@ -302,3 +302,9 @@ eda4 的正式驗證（formal verification）流程使用 SymbiYosys（sby）作
 - **Z3**：微軟的全功能 SMT 求解器
 
 透過 sby 與這些求解器，eda4 可以對 Verilog 設計進行 BMC 證明與屬性檢查，是確保硬體正確性的關鍵技術。
+
+## 延伸閱讀
+
+- [Boolean Satisfiability Problem (Wikipedia)](https://en.wikipedia.org/wiki/Boolean_satisfiability_problem)
+- [SAT Solver (Wikipedia)](https://en.wikipedia.org/wiki/SAT_solver)
+- [NP-Completeness (Wikipedia)](https://en.wikipedia.org/wiki/NP-completeness)

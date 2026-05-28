@@ -547,3 +547,9 @@ pub fn check_driver_support() -> Vec<&'static str> {
 - iCE40 程式化流程：`v2f-programmer/src/ice40_prog.rs`
 - iCE40 SRAM 載入協定：`v2f-programmer/src/ice40_cfg.rs`
 - Crate 公開介面：`v2f-programmer/src/lib.rs`
+
+## 延伸閱讀
+
+- [JTAG (Wikipedia)](https://en.wikipedia.org/wiki/JTAG)
+- [Serial Peripheral Interface (Wikipedia)](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface)
+- [IEEE 1149.1 (Wikipedia)](https://en.wikipedia.org/wiki/IEEE_1149.1)

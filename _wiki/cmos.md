@@ -326,3 +326,11 @@ MOSFET 開始導通所需的閘極-源極電壓。Vt 的選擇影響延遲與漏
 5. **為什麼不能忽視漏電**：在深次微米製程中，漏電流顯著增加，即使電路未在運作也會消耗功率。這在電池供電的 IoT 裝置中尤為關鍵。
 
 CMOS 技術從 1980 年代開始主導半導體產業，至今仍是所有數位晶片的物理基礎。從最簡單的反相器到最先進的 CPU 與 FPGA，底層的電晶體行為始終遵循相同的物理原理。掌握 CMOS 的基礎知識，是深入理解數位積體電路設計的必要前提。
+
+## 延伸閱讀
+
+- [CMOS - Complementary Metal-Oxide-Semiconductor (Wikipedia)](https://en.wikipedia.org/wiki/CMOS)
+- [MOSFET (Wikipedia)](https://en.wikipedia.org/wiki/MOSFET)
+- [Transistor (Wikipedia)](https://en.wikipedia.org/wiki/Transistor)
+- [Logic Gate (Wikipedia)](https://en.wikipedia.org/wiki/Logic_gate)
+- [Semiconductor (Wikipedia)](https://en.wikipedia.org/wiki/Semiconductor)
