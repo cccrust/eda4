@@ -19,24 +19,36 @@ echo "=== v2f check ==="
 echo ""
 mkdir -p "$ROOT/_out"
 
-synth_example() {
-    local name=$1
-    echo "=== $name: 綜合 ==="
-    if "$BIN" check 2>&1 | grep -q "yosys.*已安裝"; then
-        "$BIN" synth "$ROOT/examples/$name/$name.v" \
-            --device hx8k --top "$name" \
-            --output "$ROOT/_out/$name.json"
-        echo "  ✓ 綜合成功"
-    else
-        echo "  ✗ yosys 未安裝，跳過"
-    fi
-}
-
-synth_example blinky
-synth_example adder
+echo "=== 純 Rust E2E: blinky (Verilog) ==="
+"$BIN" build "$ROOT/examples/blinky/blinky.v" \
+    --device hx8k --backend pure-rust \
+    --output "$ROOT/_out/blinky_vlog"
+echo "  ✓ ($(wc -c < "$ROOT/_out/blinky_vlog.bin") bytes)"
 
 echo ""
-echo "=== 純 Rust 位元流打包（無需外部工具） ==="
+echo "=== 純 Rust E2E: blinky (Rust HDL) ==="
+"$BIN" build "$ROOT/examples/blinky/blinky.v" \
+    --device hx8k --backend pure-rust --lang rust \
+    --output "$ROOT/_out/blinky_rust"
+echo "  ✓ ($(wc -c < "$ROOT/_out/blinky_rust.bin") bytes)"
+
+echo ""
+echo "=== 純 Rust E2E: adder (Verilog) ==="
+"$BIN" build "$ROOT/examples/adder/adder.v" \
+    --device hx8k --backend pure-rust \
+    --output "$ROOT/_out/adder_vlog"
+echo "  ✓ ($(wc -c < "$ROOT/_out/adder_vlog.bin") bytes)"
+
+echo ""
+echo "=== 模擬燒錄 (mock JTAG) ==="
+"$BIN" prog "$ROOT/_out/blinky_vlog.bin" --driver mock
+
+echo ""
+echo "=== 模擬 SPI 燒錄 ==="
+"$BIN" prog "$ROOT/_out/blinky_rust.bin" --driver spi
+
+echo ""
+echo "=== 純 Rust 位元流打包（指定 .asc） ==="
 "$BIN" pack "$ROOT/v2f-bitstream/_fixtures/minimal_hx1k.asc" \
     --output "$ROOT/_out/minimal.bin" --backend rust
 echo "  ✓ minimal.bin ($(wc -c < "$ROOT/_out/minimal.bin") bytes)"
@@ -46,9 +58,31 @@ echo "  ✓ minimal.bin ($(wc -c < "$ROOT/_out/minimal.bin") bytes)"
 echo "  ✓ empty.bin ($(wc -c < "$ROOT/_out/empty.bin") bytes)"
 
 echo ""
+echo "=== 視覺化工具: JSON + ASC 解析測試 ==="
+cargo test -p v2f-viz 2>&1 | tail -4
+echo "  ✓ v2f-viz tests passed"
+
+echo ""
+echo "=== 視覺化工具: 產出 blinky 繪圖檔 ==="
+cp "$ROOT/_out/blinky_vlog.json" "$ROOT/_out/blinky.json" 2>/dev/null || echo "  (無 .json 輸出)"
+echo "  可用: cargo run -p v2f-viz -- _out/blinky_vlog.json _out/blinky_vlog.asc"
+
+if "$BIN" check 2>&1 | grep -q "yosys.*已安裝"; then
+    echo ""
+    echo "=== yosys 綜合 ==="
+    "$BIN" synth "$ROOT/examples/blinky/blinky.v" \
+        --device hx8k --top blinky --backend yosys \
+        --output "$ROOT/_out/blinky_yosys.json"
+    echo "  ✓"
+fi
+
+echo ""
 echo "=== 輸出檔案 ==="
 ls -la "$ROOT/_out/"
 
+
+cargo run -p v2f-viz -- _out/blinky_vlog.json _out/blinky_vlog.asc
+
 echo ""
 echo "=== 完成 ==="
-echo "下一步: 可用 iceprog/openFPGALoader 燒錄 .bin 至 FPGA"
+echo "可用 iceprog/openFPGALoader 燒錄 .bin 至 FPGA"
