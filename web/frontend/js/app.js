@@ -626,20 +626,20 @@ endmodule`,
     m[26] = 8'h00; m[27] = 8'h0A;
 
     $display("Memory dump:");
-    $display("%8x: %8x", 0, {m[0], m[1]});
-    $display("%8x: %8x", 2, {m[2], m[3]});
-    $display("%8x: %8x", 4, {m[4], m[5]});
-    $display("%8x: %8x", 6, {m[6], m[7]});
-    $display("%8x: %8x", 8, {m[8], m[9]});
-    $display("%8x: %8x", 10, {m[10], m[11]});
-    $display("%8x: %8x", 12, {m[12], m[13]});
-    $display("%8x: %8x", 14, {m[14], m[15]});
-    $display("%8x: %8x", 16, {m[16], m[17]});
-    $display("%8x: %8x", 18, {m[18], m[19]});
-    $display("%8x: %8x", 20, {m[20], m[21]});
-    $display("%8x: %8x", 22, {m[22], m[23]});
-    $display("%8x: %8x", 24, {m[24], m[25]});
-    $display("%8x: %8x", 26, {m[26], m[27]});
+    $display("%04x: %04x", 0, {m[0], m[1]});
+    $display("%04x: %04x", 2, {m[2], m[3]});
+    $display("%04x: %04x", 4, {m[4], m[5]});
+    $display("%04x: %04x", 6, {m[6], m[7]});
+    $display("%04x: %04x", 8, {m[8], m[9]});
+    $display("%04x: %04x", 10, {m[10], m[11]});
+    $display("%04x: %04x", 12, {m[12], m[13]});
+    $display("%04x: %04x", 14, {m[14], m[15]});
+    $display("%04x: %04x", 16, {m[16], m[17]});
+    $display("%04x: %04x", 18, {m[18], m[19]});
+    $display("%04x: %04x", 20, {m[20], m[21]});
+    $display("%04x: %04x", 22, {m[22], m[23]});
+    $display("%04x: %04x", 24, {m[24], m[25]});
+    $display("%04x: %04x", 26, {m[26], m[27]});
   end
 
   always @(posedge clock) begin
@@ -652,14 +652,16 @@ endmodule`,
     else if (IR[15:12] == ADD) A = A + {m[IR[11:0]], m[IR[11:0]+1]};
     else if (IR[15:12] == JMP) PC = IR[11:0];
     else if (IR[15:12] == JEQ) if (SW[14]) PC = IR[11:0];
-    $display("%4dns PC=%x IR=%x, SW=%x, A=%d", t, pc0, IR, SW, A);
+    $display("%4dns PC=%04x IR=%04x, SW=%04x, A=%4d", t, pc0, IR, SW, A);
     t = t + 10;
   end
 endmodule
 
 module main;
   reg clock;
+
   cpu cpux(clock);
+
   initial clock = 0;
   always #10 clock = ~clock;
   initial #2000 $finish;
