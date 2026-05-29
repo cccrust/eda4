@@ -27,6 +27,7 @@ pub fn gen_module(m: &Module) -> String {
     let mut initial_blocks: Vec<&Vec<Stmt>> = Vec::new();
     let mut combo_always: Vec<&AlwaysBlock> = Vec::new();
     let mut clocked_always: Vec<&AlwaysBlock> = Vec::new();
+    let mut edge_always: Vec<&AlwaysBlock> = Vec::new();
     let mut integers: Vec<&String> = Vec::new();
 
     for item in &m.items {
@@ -43,7 +44,10 @@ pub fn gen_module(m: &Module) -> String {
     }
 
     for ab in &always_blocks {
-        if has_delay_in_stmts(&ab.stmts) {
+        let is_edge = ab.sensitivity.iter().any(|s| matches!(s, Sensitivity::Posedge(_) | Sensitivity::Negedge(_)));
+        if is_edge {
+            edge_always.push(ab);
+        } else if has_delay_in_stmts(&ab.stmts) {
             clocked_always.push(ab);
         } else {
             combo_always.push(ab);
@@ -56,6 +60,37 @@ pub fn gen_module(m: &Module) -> String {
     // determine width of each signal
     let decls = build_decl_map(&m.ports, &wires, &regs, &integers);
     let sizes = build_size_map(&decls);
+
+    // collect unique single-bit edge signals for prev-value tracking;
+    // only include signals that actually exist in the module's decls.
+    let mut edge_signals = Vec::new();
+    let mut edge_always_filtered = Vec::new();
+    for ab in &edge_always {
+        let all_signals_exist: bool = ab.sensitivity.iter().all(|s| {
+            match s {
+                Sensitivity::Posedge(name) | Sensitivity::Negedge(name) => {
+                    sizes.contains_key(&to_snake(name))
+                }
+                _ => true,
+            }
+        });
+        if !all_signals_exist { continue; }
+        edge_always_filtered.push(*ab);
+        for sens in &ab.sensitivity {
+            match sens {
+                Sensitivity::Posedge(name) | Sensitivity::Negedge(name) => {
+                    let sn = to_snake(name);
+                    if let Some(w) = sizes.get(&sn).copied() {
+                        if w == 1 && !edge_signals.contains(&sn) {
+                            edge_signals.push(sn);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    edge_always = edge_always_filtered;
 
     // ----- struct fields -----
     out.push_str(&format!("#[derive(Debug, Clone)]\n"));
@@ -101,6 +136,9 @@ pub fn gen_module(m: &Module) -> String {
     }
 
     out.push_str("    running: bool,\n");
+    for sn in &edge_signals {
+        out.push_str(&format!("    _prev_{}: Level,\n", sn));
+    }
     out.push_str("}\n\n");
 
     // ----- impl new() -----
@@ -195,13 +233,52 @@ pub fn gen_module(m: &Module) -> String {
     }
 
     out.push_str("            running: true,\n");
+    for sn in &edge_signals {
+        out.push_str(&format!("            _prev_{}: Level::L,\n", sn));
+    }
     out.push_str("        }\n");
     out.push_str("    }\n\n");
 
     // ----- eval() method -----
     out.push_str("    pub fn eval(&mut self) {\n");
 
-    // eval sub-components first
+    // edge detection for posedge/negedge sensitivity
+    for sn in &edge_signals {
+        out.push_str(&format!(
+            "    let _posedge_{} = self._prev_{} == Level::L && get(&self.{}) == Level::H;\n",
+            sn, sn, sn
+        ));
+        out.push_str(&format!(
+            "    let _negedge_{} = self._prev_{} == Level::H && get(&self.{}) == Level::L;\n",
+            sn, sn, sn
+        ));
+        out.push_str(&format!("    self._prev_{} = get(&self.{});\n", sn, sn));
+    }
+    // edge-triggered always blocks
+    for ab in &edge_always {
+        let mut conds = Vec::new();
+        for sens in &ab.sensitivity {
+            match sens {
+                Sensitivity::Posedge(name) => {
+                    conds.push(format!("_posedge_{}", to_snake(name)));
+                }
+                Sensitivity::Negedge(name) => {
+                    conds.push(format!("_negedge_{}", to_snake(name)));
+                }
+                _ => {}
+            }
+        }
+        if !conds.is_empty() {
+            let combined = conds.join(" || ");
+            out.push_str(&format!("    if {} {{\n", combined));
+            for s in &ab.stmts {
+                gen_stmt(&mut out, s, &sizes, &decls, &m.params, 8);
+            }
+            out.push_str("    }\n");
+        }
+    }
+
+    // eval sub-components
     for g in &gate_insts {
         let fname = if g.instance_name.is_empty() { format!("gate_{}", to_snake(&g.gate_type)) } else { to_snake(&g.instance_name) };
         out.push_str(&format!("        self.{}.eval();\n", fname));
@@ -248,20 +325,55 @@ pub fn gen_module(m: &Module) -> String {
             }
         }
     } else {
-        out.push_str("        while self.running {\n");
-        for ab in &clocked_always {
-            for s in &ab.stmts {
-                gen_stmt(&mut out, s, &sizes, &decls, &m.params, 12);
+        let has_delayed_init = initial_blocks.iter().any(|b| has_delay_in_stmts(b));
+        if has_delayed_init {
+            // Bounded loop: run clocked always for max_init_delay / min_clocked_delay iterations
+            let min_clocked = extract_min_clocked_delay(&clocked_always);
+            let max_init = extract_max_init_delay(&initial_blocks);
+            if max_init > 0 && min_clocked > 0 {
+                let iterations = max_init / min_clocked;
+                out.push_str(&format!("        for _ in 0..{} {{\n", iterations));
+                out.push_str("            if !self.running { break; }\n");
+                for ab in &clocked_always {
+                    for s in &ab.stmts {
+                        gen_stmt(&mut out, s, &sizes, &decls, &m.params, 12);
+                    }
+                }
+                out.push_str("        }\n");
+                // delayed init blocks run once after the main loop
+                for block in &initial_blocks {
+                    if has_delay_in_stmts(block) {
+                        for s in *block {
+                            gen_delayed_stmt_post_loop(&mut out, s, &sizes, &decls, &m.params, 8);
+                        }
+                    }
+                }
+            } else {
+                // fallback: infinite while loop
+                out.push_str("        while self.running {\n");
+                for ab in &clocked_always {
+                    for s in &ab.stmts {
+                        gen_stmt(&mut out, s, &sizes, &decls, &m.params, 12);
+                    }
+                }
+                for block in &initial_blocks {
+                    if has_delay_in_stmts(block) {
+                        for s in *block {
+                            gen_stmt(&mut out, s, &sizes, &decls, &m.params, 8);
+                        }
+                    }
+                }
+                out.push_str("        }\n");
             }
-        }
-        for block in &initial_blocks {
-            if has_delay_in_stmts(block) {
-                for s in *block {
-                    gen_stmt(&mut out, s, &sizes, &decls, &m.params, 8);
+        } else {
+            out.push_str("        while self.running {\n");
+            for ab in &clocked_always {
+                for s in &ab.stmts {
+                    gen_stmt(&mut out, s, &sizes, &decls, &m.params, 12);
                 }
             }
+            out.push_str("        }\n");
         }
-        out.push_str("        }\n");
     }
     out.push_str("    }\n");
 
@@ -302,6 +414,43 @@ fn has_delay_in_stmts(stmts: &[Stmt]) -> bool {
     false
 }
 
+fn extract_first_delay(stmts: &[Stmt]) -> u64 {
+    for s in stmts {
+        if let Stmt::DelayStmt { delay, .. } = s {
+            if *delay > 0 {
+                return *delay;
+            }
+        }
+    }
+    1
+}
+
+fn extract_min_clocked_delay(clocked_always: &[&AlwaysBlock]) -> u64 {
+    clocked_always.iter()
+        .map(|ab| extract_first_delay(&ab.stmts))
+        .min()
+        .unwrap_or(1)
+}
+
+fn extract_max_init_delay(initial_blocks: &[&Vec<Stmt>]) -> u64 {
+    initial_blocks.iter()
+        .filter(|b| has_delay_in_stmts(b))
+        .map(|b| extract_first_delay(b))
+        .max()
+        .unwrap_or(0)
+}
+
+fn gen_delayed_stmt_post_loop(out: &mut String, s: &Stmt, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<String,u64>, indent: usize) {
+    match s {
+        Stmt::DelayStmt { stmt: Some(inner), .. } => {
+            gen_stmt(out, inner, sizes, decls, params, indent);
+        }
+        _ => {
+            gen_stmt(out, s, sizes, decls, params, indent);
+        }
+    }
+}
+
 fn verilog_fmt_to_rust(fmt: &str) -> String {
     let mut out = String::new();
     let mut chars = fmt.chars();
@@ -328,15 +477,25 @@ fn verilog_fmt_to_rust(fmt: &str) -> String {
                     _ => out.push_str("{}"),
                 }
             } else {
-                let w: usize = width.parse().unwrap_or(0);
+                let zero_pad = width.starts_with('0');
+                let w: usize = if zero_pad && width.len() > 1 {
+                    width[1..].parse().unwrap_or(0)
+                } else {
+                    width.parse().unwrap_or(0)
+                };
+                let fmt_spec = if zero_pad {
+                    format!(":0{w}")
+                } else {
+                    format!(":>{w}")
+                };
                 let spec = match chars.next() {
                     Some('%') => "%".to_string(),
-                    Some('d' | 'D') => format!(":>{w}}}"),
-                    Some('h' | 'H' | 'x' | 'X') => format!(":>{w}x}}"),
-                    Some('b' | 'B') => format!(":>{w}b}}"),
-                    Some('o' | 'O') => format!(":>{w}o}}"),
-                    Some('s') => format!(":>{w}}}"),
-                    _ => format!(":>{w}}}"),
+                    Some('d' | 'D') => format!("{fmt_spec}}}"),
+                    Some('h' | 'H' | 'x' | 'X') => format!("{fmt_spec}x}}"),
+                    Some('b' | 'B') => format!("{fmt_spec}b}}"),
+                    Some('o' | 'O') => format!("{fmt_spec}o}}"),
+                    Some('s') => format!("{fmt_spec}}}"),
+                    _ => format!("{fmt_spec}}}"),
                 };
                 out.push('{');
                 out.push_str(&spec);
@@ -452,6 +611,9 @@ fn gen_stmt(out: &mut String, s: &Stmt, sizes: &SizeMap, decls: &DeclMap, params
             if let Some(inner) = stmt {
                 gen_stmt(out, inner, sizes, decls, params, indent);
             }
+            if *delay > 0 {
+                out.push_str(&format!("{}self.eval();\n", ind));
+            }
         }
     }
 }
@@ -516,9 +678,10 @@ fn gen_expr_to_set(lhs: &Expr, rhs: &Expr, sizes: &SizeMap, decls: &DeclMap, par
             }
             let rhs_code = gen_expr_bus_val(rhs, sizes, decls, params, total_w);
             code.push_str(&format!("{}let __concat_val = {};\n", ind, rhs_code));
-            let mut offset = 0;
+            let mut offset = total_w;
             for (i, item) in items.iter().enumerate() {
                 let w = widths[i];
+                offset -= w;
                 if w > 1 {
                     // For array elements or bus signals
                     if let Expr::BitSelect { expr, bit } = item {
@@ -559,7 +722,6 @@ fn gen_expr_to_set(lhs: &Expr, rhs: &Expr, sizes: &SizeMap, decls: &DeclMap, par
                         ));
                     }
                 }
-                offset += w;
             }
             code
         }
@@ -601,7 +763,7 @@ fn gen_expr_str(expr: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<
             match op {
                 BinaryOp::Add => {
                     if w > 1 {
-                        format!("({} + {}) & {}", l, r, mask(w))
+                        format!("(({}) + ({})) & {}", l, r, mask(w))
                     } else {
                         format!("{}.xor({})", l, r)
                     }
@@ -633,7 +795,7 @@ fn gen_expr_str(expr: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<
                 BinaryOp::Sshl => format!("{} << {}", l, r),
                 BinaryOp::Sshr => format!("{} >> {}", l, r),
                 BinaryOp::Mul => {
-                    if w > 1 { format!("({} * {}) & {}", l, r, mask(w)) }
+                    if w > 1 { format!("(({}) * ({})) & {}", l, r, mask(w)) }
                     else { format!("if {} == Level::H && {} == Level::H {{ Level::H }} else {{ Level::L }}", l, r) }
                 }
                 BinaryOp::Div => format!("{} / {}", l, r),
@@ -771,9 +933,9 @@ fn gen_expr_val(expr: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<
             let rw = expr_width(rhs, sizes, decls, params);
             let w = std::cmp::max(lw, rw);
             match op {
-                BinaryOp::Add => format!("({} + {}) & {}", l, r, mask(w)),
+                BinaryOp::Add => format!("(({}) + ({})) & {}", l, r, mask(w)),
                 BinaryOp::Sub => format!("(({}).wrapping_sub({})) & {}", l, r, mask(w)),
-                BinaryOp::Mul => format!("({} * {}) & {}", l, r, mask(w)),
+                BinaryOp::Mul => format!("(({}) * ({})) & {}", l, r, mask(w)),
                 BinaryOp::Div => format!("({} / {})", l, r),
                 BinaryOp::Mod => format!("({} % {})", l, r),
                 BinaryOp::BitAnd => format!("({} & {})", l, r),

@@ -749,6 +749,16 @@ fn test_gen_mcu0m() {
 }
 
 #[test]
+fn test_sim_mcu0m() {
+    let code = include_str!("../verilog/mcu0m.v");
+    let out = sim(code).unwrap_or_else(|e| panic!("sim failed: {}", e));
+    assert!(out.contains("Memory dump:"), "should have memory dump");
+    assert!(out.contains("SW=8000"), "should have CMP less-than flag set");
+    assert!(out.contains("A=55"), "should sum 1..10 to 55");
+    assert!(out.contains("SW=4000"), "should have JEQ equal flag at exit");
+}
+
+#[test]
 fn test_initial_gen_run_method() {
     let input = "\
 module tb;

@@ -1,84 +1,90 @@
 # eda4 — Agent Guide
 
-Rust EDA monorepo. Each sub-project is its own Cargo workspace with an independent lockfile.
+Rust EDA monorepo. Each sub-project is its own Cargo workspace with independent lockfile. No CI, no `opencode.json`.
 
-## Top-level layout
+## Layout
 
 | Path | Description |
 |---|---|
-| `verilog2fpga/` | Workspace (9 crates) — FPGA toolchain: synth, PnR, bitstream, programmer |
+| `verilog2fpga/` | Workspace (9 crates) — iCE40 FPGA toolchain: synth→PnR→bitstream→programmer |
 | `verilog2rust/` | Single crate — Verilog→Rust HDL translator + runtime |
-| `verilog-parser/` | Standalone Verilog parser (used by v2f-synth AND verilog2rust) |
+| `verilog-parser/` | Standalone parser (shared dep of `v2f-synth` and `verilog2rust`) |
 | `ruspice/` | Analog circuit simulator (see `ruspice/AGENTS.md`) |
-| `web/` | Web workspace — `eda4-web-server` (actix-web) + static frontend + Playwright e2e |
-| `_wiki/` | Internal design docs (43 markdown files) |
+| `web/` | Workspace (`eda4-web-server` actix-web) + static HTML/JS frontend + Playwright e2e |
+| `_wiki/` | Internal design docs (43 .md files, ref not code) |
 
 ## Commands
 
-### verilog2fpga workspace
+### verilog2fpga
 
 ```
-cargo build                  # build all 9 workspace crates
-cargo test                   # test all
-cargo test -p <crate>        # test single crate (v2f-core, v2f-bitstream, etc.)
-cargo run -p v2f-viz -- <json> <asc>   # GUI visualization
-./test.sh                    # cargo build && cargo test
-./run.sh                     # full E2E pipeline → _out/
+cargo build                    # build all 9 crates
+cargo test                     # test all
+cargo test -p <crate>          # test single crate
+cargo run -p v2f-viz -- <json> <asc>
+./test.sh                      # cargo build && cargo test
+./test_cross.sh                # cross-validation: run tests tagged `cross` per layer
+./run.sh                       # full E2E pipeline → _out/
 ```
 
-`v2f` binary (`v2f-cli`): `build`, `synth`, `pnr`, `pack`, `prog`, `list-devices`, `check`. Backends: `auto` (default), `pure-rust`, `yosys`, `pnr-only`. Default device `hx8k`. Output files get `.json`, `.asc`, `.bin` suffixes.
+`v2f` CLI: `build`, `synth`, `pnr`, `pack`, `prog`, `list-devices`, `check`. Backends: `auto` (default), `pure-rust`, `yosys`, `pnr-only`. Device default `hx8k`. Output: `.json`, `.asc`, `.bin`.
+
+Separate binary `v2f-bitdecode` in same workspace: `cargo run -p v2f-bitdecode -- <bin> [--pretty]`.
+
+Fixtures: `v2f-bitstream/_fixtures/*.asc`.
 
 ### verilog2rust
 
 ```
-cargo test                   # uses --test-threads=1 (see test.sh)
-cargo run -- <file.v>        # Verilog → ruHDL (stdout)
-cargo run -- <file.v> <out.rs>  # with output path
-cargo run -- <file.rhdl>     # compile & run ruHDL
-./run.sh                     # convert all verilog/*.v + cargo test
-./run_tb.sh                  # convert testbenches (verilog/*_tb.v) + run them
-./test.sh                    # cargo test -- --test-threads=1
+cargo test                     # uses --test-threads=1
+cargo run -- <file.v>          # Verilog → ruHDL (stdout)
+cargo run -- <file.rhdl>       # compile & run ruHDL
+./run.sh                       # convert all verilog/*.v + cargo test
+./run_tb.sh                    # convert testbenches (verilog/*_tb.v) + run them
+./test.sh                      # cargo test -- --test-threads=1
 ```
 
-Always set `RUST_BACKTRACE=1` when debugging verilog2rust (default in scripts).
+Always `RUST_BACKTRACE=1` when debugging (default in scripts). Tests compile generated code via rustc at runtime (`/tmp/v2r_*.rs`).
 
-### web workspace
+### web
 
 ```
 cargo test -p eda4-web-server   # backend tests
-cargo run -p eda4-web-server     # start server (port 8080)
-cd frontend && npx playwright test  # e2e tests (needs server running)
+cargo run -p eda4-web-server     # server on :8080
+./web.sh                         # kills old server, starts fresh, runs Playwright e2e
+cd frontend && npx playwright test  # e2e (needs server already running)
 ```
 
-Frontend is plain HTML+JS (no framework). E2E via Playwright (`tests/e2e.spec.js`).
+Playwright config at `frontend/playwright.config.js` — tests in `frontend/tests/e2e.spec.js`. Frontend is plain HTML+JS, no framework.
 
 ### ruspice
 
-See its own `ruspice/AGENTS.md` — standalone analog simulator with SPICE parser.
+See `ruspice/AGENTS.md`. Standalone — `cargo test`, `cargo run`, `cargo run --example basic`.
 
-## Architecture notes
+## Architecture
 
-- **verilog2fpga** pipeline: `.v` → `v2f-synth` (JSON netlist) → `v2f-pnr` (ASC) → `v2f-bitstream` (BIN) → `v2f-programmer` (mock/real JTAG/SPI). Default is pure-Rust; yosys/nextpnr/icepack are optional (`brew install` on macOS).
-- **verilog2rust** depends on `verilog-parser` via path. Testbenches: convert `.v` → `.rhdl` then run `.rhdl` (`run_tb.sh`). MCU0m sim uses `verilog/mcu0m/mcu0m_sim.rs`.
-- **verilog-parser** is shared; both `v2f-synth` and `verilog2rust` use it (verilog2rust via path dep).
-- **web server** depends on crates from across the monorepo: `verilog2rust`, `v2f-*`, `ruspice`, `base64`. Four tabs: Verilog sim, Verilog PnR, SPICE, Bitstream decode.
-- **Device support**: iCE40 HX1K, HX4K, HX8K, LP1K, UP5K (case-insensitive). Default: `hx8k`.
+- **verilog2fpga pipeline**: `.v` → `v2f-synth` (JSON netlist) → `v2f-pnr` (ASC) → `v2f-bitstream` (BIN) → `v2f-programmer` (mock/real JTAG/SPI).
+- **verilog2rust** depends on `verilog-parser` via path. Converts `.v` → ruHDL; testbenches get `fn main()`. `verilog/mcu0m/mcu0m_sim.rs` is hand-written MCU0m simulation.
+- **verilog-parser** has 3 sources: `lib.rs`, `ast.rs`, `parse.rs` — used by both `v2f-synth` and `verilog2rust`.
+- **web server** embeds `verilog2rust`, `v2f-*`, `ruspice`, `base64`. Four tabs: Verilog sim, Verilog PnR, SPICE, Bitstream decode.
+- **iCE40 devices**: HX1K, HX4K, HX8K, LP1K, UP5K (case-insensitive). Default HX8K.
 - **Output dir**: `_out/` (gitignored).
-- **Fixtures**: `v2f-bitstream/_fixtures/*.asc`.
-- **`v2f-rust` / `v2f-rust-macros`**: exist only in docs/wiki (not yet implemented on disk).
+- **`v2f-rust` / `v2f-rust-macros`**: documented in wiki, not yet implemented.
 
 ## Known rHDL limitations (verilog2rust)
 
-### 1. `@(posedge clock)` ignored — CPU simulation wrong
-`always @(posedge clock)` has no `#delay` inside, so `has_delay_in_stmts()` returns false → categorized as `combo_always`, placed in `eval()` instead of the clocked loop in `run()`. CPU logic executes on EVERY eval tick instead of only on clock edges. Edge-triggered circuits (MCU0m, FSMs, counters) run at 10× the expected rate.
+### 1. `@(posedge clock)` ignored — CPU runs at 10× speed
+`always @(posedge clock)` without `#delay` inside → `has_delay_in_stmts()` is false → categorized as `combo_always` → logic placed in `eval()` instead of the clocked loop in `run()`. Edge-triggered circuits execute every eval tick.
 
-**Fix location**: `verilog2rust/src/verilog/gen.rs:45-50` — always-block categorization. Need a way to detect edge sensitivity (`posedge`/`negedge`) in the sensitivity list, or treat all `always @(*)` as combo and all `always @(posedge/negedge ...)` as clocked regardless of `#delay`.
+**Fix**: `verilog2rust/src/verilog/gen.rs:45-50` — detect edge sensitivity (`posedge`/`negedge`) in sensitivity list, or treat all `@(*)` as combo and all `@(posedge/negedge ...)` as clocked regardless of `#delay`.
 
-### 2. `$finish` + delays — simulation terminates instantly
-`DelayStmt` originally discarded the delay value (`Stmt::DelayStmt { stmt, .. }` → just `self.eval()`). Fixed 2026-05-29 to `for _ in 0..delay { self.eval(); }` (line 448-454). BUT: the while-loop structure puts both clocked always and delayed initials in the same loop body. `always #10` and `initial #2000 $finish` run sequentially each iteration, so `$finish` fires after 2000 evals on the first iteration. Correct behavior: concurrent time-advance loop where each block's delay is checked against a shared `sim_time` counter.
+### 2. `$finish` + delays — simulation terminates early
+`DelayStmt` was fixed from discarding delays to `for _ in 0..delay { self.eval(); }` (line 448-454). But delayed blocks and clocked always blocks share the same while-loop body → `initial #2000 $finish` fires after 2000 evals on the first iteration.
 
-### 3. Possible SW bit ordering bug (MCU0m CMP)
-Icarus shows `SW=8000` after first CMP, rHDL shows `SW=4000`. `bus_to_u16` reads bit `i` from wire `i` (`val |= 1 << i`), and `u16_to_bus` writes bit `i` to wire `i`. This is LSB0 (bit 0 = wire 0). The Verilog `SW[15]` should map to the MSB (wire 15), which it does in the generated code. Need to investigate why `0 < 10` evaluates to setting bit 14 instead of bit 15 — could be an issue in the generated comparison expression or the `s_w` vector layout.
+**Fix needed**: concurrent time-advance loop with shared `sim_time` counter.
+
+### 3. Possible SW bit ordering bug
+Icarus shows `SW=8000` after first CMP, rHDL shows `SW=4000`. LSB0 mapping (bit `i` = wire `i`) looks correct for `SW[15]` → wire 15. Investigate generated comparison expression or `s_w` vector layout.
 
 ### 4. MCU0m sim test status
-`test_gen_mcu0m` exists (structural — parses + validates codegen). No simulation test yet because the rHDL output doesn't match Icarus. Need a functional simulation test that checks MCU0m behavior once the edge-trigger and SW issues are resolved.
+`test_gen_mcu0m` validates codegen only. No functional sim test — rHDL output doesn't match Icarus yet.
