@@ -732,6 +732,23 @@ endmodule";
 }
 
 #[test]
+fn test_gen_mcu0m() {
+    let code = include_str!("../verilog/mcu0m.v");
+    let modules = parse_verilog(code);
+    assert_eq!(modules.len(), 2);
+    assert_eq!(modules[0].name, "cpu");
+    assert_eq!(modules[0].ports.len(), 1);
+    assert_eq!(modules[0].ports[0].name, "clock");
+    assert_eq!(modules[1].name, "main");
+    let rust_code = gen_ruhdl(&modules);
+    let opens = rust_code.matches('{').count();
+    let closes = rust_code.matches('}').count();
+    assert_eq!(opens, closes, "Braces in generated code should be balanced");
+    assert!(rust_code.contains("pub struct Cpu"));
+    assert!(rust_code.contains("pub struct Main"));
+}
+
+#[test]
 fn test_initial_gen_run_method() {
     let input = "\
 module tb;

@@ -22,12 +22,12 @@
   button.primary { background: #7dd3fc22; border-color: #7dd3fc; color: #7dd3fc; }
   button.primary:hover { background: #7dd3fc33; }
   button.danger { background: #f8717122; border-color: #f87171; color: #f87171; }
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 500px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; min-height: 500px; height: calc(100vh - 230px); }
   .editor-pane, .output-pane { display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
   .pane-label { font-size: 0.75rem; color: #666; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
   textarea { flex: 1; width: 100%; min-height: 0; background: #12121f; border: 1px solid #2a2a3a; border-radius: 6px; color: #d4d4d4; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; padding: 0.6rem; resize: none; line-height: 1.5; overflow: auto; }
   textarea:focus { outline: none; border-color: #444; }
-  .output { flex: 1; min-height: 0; background: #12121f; border: 1px solid #2a2a3a; border-radius: 6px; overflow: auto; padding: 0.6rem; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; white-space: pre-wrap; line-height: 1.5; color: #aaa; }
+  .output { flex: 1; min-height: 0; background: #12121f; border: 1px solid #2a2a3a; border-radius: 6px; overflow-y: auto; padding: 0.6rem; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; white-space: pre-wrap; line-height: 1.5; color: #aaa; }
   .output.error { color: #f87171; border-color: #f8717133; }
   .output.success { color: #86efac; border-color: #86efac33; }
   .output.info { color: #7dd3fc; }
@@ -81,6 +81,7 @@
         <option value="decoder">Decoder 2x4 (with TB)</option>
         <option value="register">Register (with TB)</option>
         <option value="fsm">FSM (Moore 3-state, with TB)</option>
+        <option value="mcu0m">MCU0m CPU (with clock+TB)</option>
       </select>
       <button id="btn-verilog-clear">Clear Output</button>
       <span class="meta">Compiles via rustc and runs rHDL simulation</span>

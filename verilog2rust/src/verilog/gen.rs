@@ -100,6 +100,7 @@ pub fn gen_module(m: &Module) -> String {
         out.push_str(&format!("    {}: {},\n", fname, sn));
     }
 
+    out.push_str("    running: bool,\n");
     out.push_str("}\n\n");
 
     // ----- impl new() -----
@@ -193,6 +194,7 @@ pub fn gen_module(m: &Module) -> String {
         out.push_str(&format!("            {}: {}::new({}),\n", fname, sn, args.join(", ")));
     }
 
+    out.push_str("            running: true,\n");
     out.push_str("        }\n");
     out.push_str("    }\n\n");
 
@@ -237,19 +239,29 @@ pub fn gen_module(m: &Module) -> String {
             }
         }
     }
-    for ab in &clocked_always {
-        out.push_str("        loop {\n");
-        for s in &ab.stmts {
-            gen_stmt(&mut out, s, &sizes, &decls, &m.params, 12);
-        }
-        out.push_str("        }\n");
-    }
-    for block in &initial_blocks {
-        if has_delay_in_stmts(block) {
-            for s in *block {
-                gen_stmt(&mut out, s, &sizes, &decls, &m.params, 8);
+    if clocked_always.is_empty() {
+        for block in &initial_blocks {
+            if has_delay_in_stmts(block) {
+                for s in *block {
+                    gen_stmt(&mut out, s, &sizes, &decls, &m.params, 8);
+                }
             }
         }
+    } else {
+        out.push_str("        while self.running {\n");
+        for ab in &clocked_always {
+            for s in &ab.stmts {
+                gen_stmt(&mut out, s, &sizes, &decls, &m.params, 12);
+            }
+        }
+        for block in &initial_blocks {
+            if has_delay_in_stmts(block) {
+                for s in *block {
+                    gen_stmt(&mut out, s, &sizes, &decls, &m.params, 8);
+                }
+            }
+        }
+        out.push_str("        }\n");
     }
     out.push_str("    }\n");
 
@@ -295,14 +307,39 @@ fn verilog_fmt_to_rust(fmt: &str) -> String {
     let mut chars = fmt.chars();
     while let Some(c) = chars.next() {
         if c == '%' {
-            match chars.next() {
-                Some('%') => out.push('%'),
-                Some('d' | 'D') => out.push_str("{}"),
-                Some('h' | 'H' | 'x' | 'X') => out.push_str("{:x}"),
-                Some('b' | 'B') => out.push_str("{:b}"),
-                Some('o' | 'O') => out.push_str("{:o}"),
-                Some('s') => out.push_str("{}"),
-                _ => out.push_str("{}"),
+            let mut width = String::new();
+            loop {
+                match chars.clone().next() {
+                    Some(d) if d.is_ascii_digit() => {
+                        width.push(d);
+                        chars.next();
+                    }
+                    _ => break,
+                }
+            }
+            if width.is_empty() {
+                match chars.next() {
+                    Some('%') => out.push('%'),
+                    Some('d' | 'D') => out.push_str("{}"),
+                    Some('h' | 'H' | 'x' | 'X') => out.push_str("{:x}"),
+                    Some('b' | 'B') => out.push_str("{:b}"),
+                    Some('o' | 'O') => out.push_str("{:o}"),
+                    Some('s') => out.push_str("{}"),
+                    _ => out.push_str("{}"),
+                }
+            } else {
+                let w: usize = width.parse().unwrap_or(0);
+                let spec = match chars.next() {
+                    Some('%') => "%".to_string(),
+                    Some('d' | 'D') => format!(":>{w}}}"),
+                    Some('h' | 'H' | 'x' | 'X') => format!(":>{w}x}}"),
+                    Some('b' | 'B') => format!(":>{w}b}}"),
+                    Some('o' | 'O') => format!(":>{w}o}}"),
+                    Some('s') => format!(":>{w}}}"),
+                    _ => format!(":>{w}}}"),
+                };
+                out.push('{');
+                out.push_str(&spec);
             }
         } else {
             out.push(c);
@@ -405,11 +442,13 @@ fn gen_stmt(out: &mut String, s: &Stmt, sizes: &SizeMap, decls: &DeclMap, params
             }
         }
         Stmt::SysFinish => {
+            out.push_str(&format!("{}self.running = false;\n", ind));
             out.push_str(&format!("{}return;\n", ind));
         }
-        Stmt::DelayStmt { stmt, .. } => {
-            // In cycle-based simulation, a delay means "evaluate the design"
-            out.push_str(&format!("{}self.eval();\n", ind));
+        Stmt::DelayStmt { stmt, delay } => {
+            if *delay > 0 {
+                out.push_str(&format!("{}for _ in 0..{} {{ self.eval(); }}\n", ind, delay));
+            }
             if let Some(inner) = stmt {
                 gen_stmt(out, inner, sizes, decls, params, indent);
             }
