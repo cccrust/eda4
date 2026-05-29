@@ -44,15 +44,22 @@ fn run_rhdl(input_path: &str) {
 fn convert_verilog(input_path: &str, output_arg: &str) {
     let modules = verilog2rust::parse_file(input_path);
     let rust_code = verilog2rust::gen_ruhdl(&modules);
-    let output_path = if output_arg.ends_with(".rs") || output_arg.ends_with(".rhdl") {
-        output_arg.to_string()
-    } else {
-        let input_stem = Path::new(input_path)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("output");
-        format!("{}/{}.rs", output_arg, input_stem)
-    };
+        let output_path = if output_arg.ends_with(".rs") || output_arg.ends_with(".rhdl") {
+            output_arg.to_string()
+        } else if output_arg == "." {
+            let input_dir = Path::new(input_path).parent().unwrap_or(Path::new("."));
+            let input_stem = Path::new(input_path)
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("output");
+            format!("{}/{}.rs", input_dir.display(), input_stem)
+        } else {
+            let input_stem = Path::new(input_path)
+                .file_stem()
+                .and_then(|s| s.to_str())
+                .unwrap_or("output");
+            format!("{}/{}.rs", output_arg, input_stem)
+        };
     if let Some(parent) = Path::new(&output_path).parent() {
         if !parent.as_os_str().is_empty() {
             fs::create_dir_all(parent).ok();

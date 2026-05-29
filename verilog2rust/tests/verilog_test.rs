@@ -1,10 +1,47 @@
-use verilog2rust::{parse_verilog, gen_ruhdl};
+use verilog2rust::{parse_verilog, gen_ruhdl, preprocess_only};
 use verilog_parser::ast::*;
 use std::process::{Command, Stdio};
 use std::fs;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static COUNTER: AtomicU64 = AtomicU64::new(0);
+
+fn sim_preproc(code: &str) -> Result<String, String> {
+    let expanded = preprocess_only(code);
+    sim(&expanded)
+}
+
+fn sim_with_hex(code: &str, hex_content: &str) -> Result<String, String> {
+    let expanded = preprocess_only(code);
+    let rlib_path = format!("{}/target/debug/libverilog2rust.rlib", env!("CARGO_MANIFEST_DIR"));
+    let rlib_dir = format!("{}/target/debug", env!("CARGO_MANIFEST_DIR"));
+    let deps_dir = format!("{}/target/debug/deps", env!("CARGO_MANIFEST_DIR"));
+    let modules = parse_verilog(&expanded);
+    let rust_code = gen_ruhdl(&modules);
+    let id = COUNTER.fetch_add(1, Ordering::Relaxed);
+    let tmp = std::path::Path::new("/tmp");
+    let src = tmp.join(format!("v2r_{}.rs", id));
+    let out_bin = tmp.join(format!("v2r_{}", id));
+    let hex_path = tmp.join("mcu0m.hex");
+    fs::write(&src, &rust_code).map_err(|e| e.to_string())?;
+    fs::write(&hex_path, hex_content).map_err(|e| e.to_string())?;
+    let status = Command::new("rustc")
+        .args(["--extern", &format!("verilog2rust={}", rlib_path),
+               "-L", &rlib_dir, "-L", &deps_dir, src.to_str().unwrap(), "-o", out_bin.to_str().unwrap(), "--edition", "2021"])
+        .stdout(Stdio::piped()).stderr(Stdio::piped())
+        .status().map_err(|e| e.to_string())?;
+    if !status.success() {
+        let stderr = String::from_utf8_lossy(&{
+            Command::new("rustc")
+                .args(["--extern", &format!("verilog2rust={}", rlib_path),
+                       "-L", &rlib_dir, "-L", &deps_dir, src.to_str().unwrap(), "-o", out_bin.to_str().unwrap(), "--edition", "2021"])
+                .output().expect("rustc failed").stderr
+        }).to_string();
+        return Err(format!("compile failed:\n=== STDERR ===\n{}", stderr));
+    }
+    let output = Command::new(&out_bin).current_dir(&tmp).output().map_err(|e| e.to_string())?;
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+}
 
 fn sim(code: &str) -> Result<String, String> {
     let rlib_path = format!("{}/target/debug/libverilog2rust.rlib", env!("CARGO_MANIFEST_DIR"));
@@ -752,10 +789,29 @@ fn test_gen_mcu0m() {
 fn test_sim_mcu0m() {
     let code = include_str!("../verilog/mcu0m.v");
     let out = sim(code).unwrap_or_else(|e| panic!("sim failed: {}", e));
-    assert!(out.contains("Memory dump:"), "should have memory dump");
-    assert!(out.contains("SW=8000"), "should have CMP less-than flag set");
-    assert!(out.contains("A=55"), "should sum 1..10 to 55");
-    assert!(out.contains("SW=4000"), "should have JEQ equal flag at exit");
+    assert!(out.contains("Memory dump:"), "should have memory dump, got: {:?}", out);
+    assert!(out.contains("SW=8000"), "should have CMP less-than flag set, full: {:?}", out);
+    assert!(out.contains("=  55"), "should sum 1..10 to 55, full: {:?}", out);
+    assert!(out.contains("SW=4000"), "should have JEQ equal flag at exit, full: {:?}", out);
+}
+
+#[test]
+fn test_sim_mcu0m1() {
+    let code = include_str!("../verilog/mcu0m1.v");
+    let out = sim_preproc(code).unwrap_or_else(|e| panic!("sim failed: {}", e));
+    assert!(out.contains("SW=8000"), "should have CMP less-than flag set, full: {:?}", out);
+    assert!(out.contains("A=55"), "should sum 1..10 to 55, full: {:?}", out);
+    assert!(out.contains("SW=4000"), "should have JEQ equal flag at exit, full: {:?}", out);
+}
+
+#[test]
+fn test_sim_mcu0m_from_mcu0_dir() {
+    let code = include_str!("../verilog/mcu0/mcu0m.v");
+    let hex = include_str!("../verilog/mcu0/mcu0m.hex");
+    let out = sim_with_hex(code, hex).unwrap_or_else(|e| panic!("sim failed: {}", e));
+    assert!(out.contains("SW=8000"), "should have CMP less-than flag set, full: {:?}", out);
+    assert!(out.contains("A=55"), "should sum 1..10 to 55, full: {:?}", out);
+    assert!(out.contains("SW=4000"), "should have JEQ equal flag at exit, full: {:?}", out);
 }
 
 #[test]

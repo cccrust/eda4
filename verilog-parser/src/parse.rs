@@ -6,7 +6,7 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // keywords
-    Module, Endmodule, Input, Output, Inout, Wire, Reg, Integer, Parameter,
+    Module, Endmodule, Input, Output, Inout, Wire, Reg, Signed, Integer, Parameter,
     Assign, Always, Posedge, Negedge, Begin, End,
     If, Else, Case, Endcase, Default, For, Forever,
     // operators
@@ -61,6 +61,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                 "inout" => Token::Inout,
                 "wire" => Token::Wire,
                 "reg" => Token::Reg,
+                "signed" => Token::Signed,
                 "integer" => Token::Integer,
                 "assign" => Token::Assign,
                 "always" => Token::Always,
@@ -277,6 +278,7 @@ impl Parser {
             match self.toks.get(self.pos) {
                 Some(Token::Parameter) => {
                     self.pos += 1;
+                    self.parse_range_opt();
                     loop {
                         let pname = self.expect_ident();
                         self.expect_assign();
@@ -376,6 +378,7 @@ impl Parser {
             match self.toks.get(self.pos) {
                 Some(Token::Parameter) => {
                     self.pos += 1;
+                    self.parse_range_opt();
                     loop {
                         let pname = self.expect_ident();
                         self.expect_assign();
@@ -669,10 +672,11 @@ impl Parser {
     fn parse_for(&mut self) -> Stmt {
         self.pos += 1;
         self.expect_lparen();
-        let init = Box::new(self.parse_assign_stmt_or_empty());
+        let init = Box::new(self.parse_assign_no_semi());
+        self.expect_semi();
         let cond = self.parse_expr(0);
         self.expect_semi();
-        let inc = Box::new(self.parse_assign_stmt_or_empty());
+        let inc = Box::new(self.parse_assign_no_semi());
         self.expect_rparen();
         let stmts = self.parse_block();
         Stmt::For { init, cond, inc, stmts }
@@ -681,6 +685,13 @@ impl Parser {
     fn parse_assign_stmt_or_empty(&mut self) -> Stmt {
         if self.at(Token::Semicolon) { return Stmt::BlockingAssign { lhs: Expr::Ident("".into()), rhs: Expr::Ident("".into()) }; }
         self.parse_assign_stmt()
+    }
+
+    fn parse_assign_no_semi(&mut self) -> Stmt {
+        let lhs = self.parse_lhs();
+        if self.at_token(Token::Leq) { self.pos += 1; let rhs = self.parse_expr(0); Stmt::NonBlockingAssign { lhs, rhs } }
+        else if self.at_token(Token::AssignOp) { self.pos += 1; let rhs = self.parse_expr(0); Stmt::BlockingAssign { lhs, rhs } }
+        else { Stmt::BlockingAssign { lhs: Expr::Ident("__skip__".into()), rhs: Expr::Ident("__skip__".into()) } }
     }
 
     fn parse_assign_stmt(&mut self) -> Stmt {
@@ -847,6 +858,7 @@ impl Parser {
     }
 
     fn parse_range_opt(&mut self) -> Option<Range> {
+        if self.at(Token::Signed) { self.pos += 1; }
         if self.at_token(Token::LBracket) {
             self.pos += 1;
             let msb = self.parse_expr(0);
@@ -894,7 +906,7 @@ impl Parser {
 
     fn advance(&mut self) { self.pos += 1; }
     fn expect_ident(&mut self) -> String {
-        match &self.toks[self.pos] { Token::Ident(s) => { let s = s.clone(); self.pos += 1; s } _ => panic!("expected ident") }
+        match &self.toks[self.pos] { Token::Ident(s) => { let s = s.clone(); self.pos += 1; s } _ => panic!("expected ident at pos {}, got {:?}", self.pos, self.toks[self.pos]) }
     }
     fn expect_lparen(&mut self) { expect!(self, Token::LParen); }
     fn expect_rparen(&mut self) { expect!(self, Token::RParen); }

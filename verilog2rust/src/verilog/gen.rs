@@ -121,6 +121,11 @@ pub fn gen_module(m: &Module) -> String {
         }
     }
 
+    // integer fields (native Rust i64, not wire buses)
+    for n in &integers {
+        out.push_str(&format!("    {}: i64,\n", to_snake(n)));
+    }
+
     // gate sub-component fields
     for g in &gate_insts {
         let rust_gate = verilog_gate_to_rust(&g.gate_type);
@@ -135,6 +140,7 @@ pub fn gen_module(m: &Module) -> String {
         out.push_str(&format!("    {}: {},\n", fname, sn));
     }
 
+    out.push_str("    sim_time: u64,\n");
     out.push_str("    running: bool,\n");
     for sn in &edge_signals {
         out.push_str(&format!("    _prev_{}: Level,\n", sn));
@@ -232,6 +238,10 @@ pub fn gen_module(m: &Module) -> String {
         out.push_str(&format!("            {}: {}::new({}),\n", fname, sn, args.join(", ")));
     }
 
+    for n in &integers {
+        out.push_str(&format!("            {}: 0,\n", to_snake(n)));
+    }
+    out.push_str("            sim_time: 0u64,\n");
     out.push_str("            running: true,\n");
     for sn in &edge_signals {
         out.push_str(&format!("            _prev_{}: Level::L,\n", sn));
@@ -241,6 +251,9 @@ pub fn gen_module(m: &Module) -> String {
 
     // ----- eval() method -----
     out.push_str("    pub fn eval(&mut self) {\n");
+
+    // increment simulation time
+    out.push_str("    self.sim_time += 1;\n");
 
     // edge detection for posedge/negedge sensitivity
     for sn in &edge_signals {
@@ -596,6 +609,50 @@ fn gen_stmt(out: &mut String, s: &Stmt, sizes: &SizeMap, decls: &DeclMap, params
                         out.push_str(&format!("{}println!();\n", ind));
                     }
                 }
+            } else if name == "$readmemh" || name == "$readmemb" {
+                if args.len() >= 2 {
+                    let filename = match &args[0] {
+                        Expr::Ident(s) => s.strip_prefix("__str:").unwrap_or(s).to_string(),
+                        _ => String::new(),
+                    };
+                    let mem_name = match &args[1] {
+                        Expr::Ident(n) => to_snake(n),
+                        _ => String::new(),
+                    };
+                    if !filename.is_empty() && !mem_name.is_empty() {
+                        let w = sizes.get(&mem_name).copied().unwrap_or(8);
+                        let is_hex = name == "$readmemh";
+                        out.push_str(&format!("{}let __data = std::fs::read_to_string(\"{}\").unwrap_or_else(|_| \"\".to_string());\n", ind, filename));
+                        out.push_str(&format!("{}let __lines: Vec<&str> = __data.lines().collect();\n", ind));
+                        out.push_str(&format!("{}let mut __addr = 0usize;\n", ind));
+                        out.push_str(&format!("{}let mut __in_block = false;\n", ind));
+                        out.push_str(&format!("{}for __line in &__lines {{\n", ind));
+                        out.push_str(&format!("{}    let __line = __line.trim();\n", ind));
+                        out.push_str(&format!("{}    if __line.is_empty() || __line.starts_with(\"//\") || __line.starts_with('#') {{ continue; }}\n", ind));
+                        out.push_str(&format!("{}    let __comment_pos = __line.find(\"//\").unwrap_or(__line.len());\n", ind));
+                        out.push_str(&format!("{}    let __line = &__line[..__comment_pos].trim();\n", ind));
+                        out.push_str(&format!("{}    if __line.is_empty() {{ continue; }}\n", ind));
+                        out.push_str(&format!("{}    if __line.starts_with('@') {{\n", ind));
+                        out.push_str(&format!("{}        __addr = usize::from_str_radix(&__line[1..], 16).unwrap_or(0);\n", ind));
+                        out.push_str(&format!("{}        __in_block = true;\n", ind));
+                        out.push_str(&format!("{}        continue;\n", ind));
+                        out.push_str(&format!("{}    }}\n", ind));
+                        out.push_str(&format!("{}    if !__in_block {{ __in_block = true; }}\n", ind));
+                        let radix = if is_hex { 16 } else { 2 };
+                        out.push_str(&format!("{}    for __token in __line.split_whitespace() {{\n", ind));
+                        out.push_str(&format!("{}        if let Ok(__val) = u64::from_str_radix(__token.trim_start_matches(\"0x\").trim_start_matches(\"0X\"), {}) {{\n", ind, radix));
+                        out.push_str(&format!("{}            let __elem_mask = (1u64 << {}) - 1;\n", ind, w));
+                        out.push_str(&format!("{}            u16_to_bus(&mut self.{}[__addr], (__val & __elem_mask) as u16);\n", ind, mem_name));
+                        out.push_str(&format!("{}            __addr += 1;\n", ind));
+                        out.push_str(&format!("{}        }}\n", ind));
+                        out.push_str(&format!("{}    }}\n", ind));
+                        out.push_str(&format!("{}}}\n", ind));
+                    } else {
+                        out.push_str(&format!("{}// unknown syscall: {} (could not parse args)\n", ind, name));
+                    }
+                } else {
+                    out.push_str(&format!("{}// unknown syscall: {}\n", ind, name));
+                }
             } else {
                 out.push_str(&format!("{}// unknown syscall: {}\n", ind, name));
             }
@@ -624,6 +681,11 @@ fn gen_expr_to_set(lhs: &Expr, rhs: &Expr, sizes: &SizeMap, decls: &DeclMap, par
     match lhs {
         Expr::Ident(name) => {
             let lname = to_snake(name);
+            // Integer types (native Rust i64 fields)
+            if let Some(DeclInfo { kind: DeclKind::Integer, .. }) = decls.get(&lname) {
+                let rhs_code = gen_expr_val(rhs, sizes, decls, params);
+                return format!("{}self.{} = ({}) as i64;\n", ind, lname, rhs_code);
+            }
             let w = sizes.get(&lname).copied().unwrap_or(1);
             if w > 1 {
                 let rhs_code = gen_expr_bus_val(rhs, sizes, decls, params, w);
@@ -746,7 +808,14 @@ fn gen_expr_str(expr: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<
             if let Some(val) = params.get(name) {
                 return format!("({}u64) & {}", val, mask(if *val == 0 { 1 } else { 64 - val.leading_zeros() as u64 }.max(1)));
             }
+            if name == "$stime" || name == "$time" {
+                return "self.sim_time as u64".to_string();
+            }
             let n = to_snake(name);
+            // Integer types (native Rust i64 fields)
+            if let Some(DeclInfo { kind: DeclKind::Integer, .. }) = decls.get(&n) {
+                return format!("self.{} as u64", n);
+            }
             let w = sizes.get(&n).copied().unwrap_or(1);
             if w > 1 {
                 format!("bus_to_u16(&self.{})", n)
@@ -918,7 +987,15 @@ fn gen_expr_val(expr: &Expr, sizes: &SizeMap, decls: &DeclMap, params: &HashMap<
             if let Some(val) = params.get(name) {
                 return format!("{}u64", val);
             }
+            // System functions
+            if name == "$stime" || name == "$time" {
+                return "self.sim_time as u64".to_string();
+            }
             let n = to_snake(name);
+            // Integer types (native Rust i64 fields)
+            if let Some(DeclInfo { kind: DeclKind::Integer, .. }) = decls.get(&n) {
+                return format!("self.{} as u64", n);
+            }
             let w = sizes.get(&n).copied().unwrap_or(1);
             if w > 1 {
                 format!("bus_to_u16(&self.{}) as u64", n)
