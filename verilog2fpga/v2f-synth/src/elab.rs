@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::ast::{self, *};
 use crate::netlist::{self, *};
@@ -155,10 +155,15 @@ pub fn elaborate(module: &Module) -> Netlist {
             }
             ModuleItem::Always(a) => {
                 let has_posedge = a.sensitivity.iter().any(|e| e.edge == Edge::Posedge);
-                if !has_posedge { panic!("僅支援 posedge 觸發的 always") }
-                for stmt in &a.stmts {
-                    process_always_stmt(&mut ctx, stmt);
+                let has_comb = a.sensitivity.iter().any(|e| e.edge == Edge::None);
+                if has_comb {
+                    process_combinational_always(&mut ctx, &a.stmts);
+                } else if has_posedge {
+                    for stmt in &a.stmts {
+                        process_always_stmt(&mut ctx, stmt);
+                    }
                 }
+                // negedge-only is unsupported; silently skip
             }
             _ => {}
         }
@@ -207,5 +212,297 @@ fn process_always_stmt(ctx: &mut Ctx, stmt: &Stmt) {
         Stmt::Block(stmts) => {
             for stmt in stmts { process_always_stmt(ctx, stmt); }
         }
+        Stmt::Case { .. } => {
+            panic!("case statements are only supported in combinational (always @*) blocks");
+        }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Combinational always @(*) support
+// ---------------------------------------------------------------------------
+
+/// Process an `always @(*)` block: treat blocking assigns as wire connections,
+/// case/if as MUX trees.
+fn process_combinational_always(ctx: &mut Ctx, stmts: &[Stmt]) {
+    // Track the current driven value for each signal.
+    // Initialized to the signal's own bits (self-loop = no change).
+    let mut drives: HashMap<String, Vec<BitId>> = HashMap::new();
+    for (name, sig) in &ctx.sigs {
+        drives.insert(name.clone(), sig.bits.clone());
+    }
+
+    for stmt in stmts {
+        process_comb_stmt(ctx, stmt, &mut drives);
+    }
+
+    // Connect drives to target signal bits (buffer connection).
+    for (name, drive_bits) in &drives {
+        if let Some(target) = ctx.sigs.get(name) {
+            for (i, &bit) in target.bits.iter().enumerate() {
+                let val = *drive_bits.get(i).unwrap_or(&bit);
+                if val != bit {
+                    ctx.net.add_cell(
+                        CellKind::And,
+                        vec![("A", vec![val]), ("B", vec![val])],
+                        vec![("Y", vec![bit])],
+                    );
+                }
+            }
+        }
+    }
+}
+
+fn process_comb_stmt(
+    ctx: &mut Ctx,
+    stmt: &Stmt,
+    drives: &mut HashMap<String, Vec<BitId>>,
+) {
+    match stmt {
+        Stmt::Blocking { target, value } => {
+            let target_bits = ctx.resolve_expr(target);
+            let value_bits = ctx.resolve_expr(value);
+            overlay_drive(ctx, target, target_bits, value_bits, drives);
+        }
+        Stmt::Nonblocking { .. } => {
+            // Non-blocking assigns in combinational blocks are ignored
+        }
+        Stmt::If { cond, then, else_ } => {
+            let cond_bits = ctx.resolve_expr(cond);
+            let cond_bit = cond_bits[0];
+
+            let pre = snapshot_drives(drives);
+
+            let mut then_drives = pre.clone();
+            for s in then {
+                process_comb_stmt(ctx, s, &mut then_drives);
+            }
+
+            let mut else_drives = pre;
+            if let Some(else_stmts) = else_ {
+                for s in else_stmts {
+                    process_comb_stmt(ctx, s, &mut else_drives);
+                }
+            }
+
+            // MUX between then and else values
+            for (name, then_bits) in &then_drives {
+                let else_bits = else_drives.get(name).cloned().unwrap_or_else(|| {
+                    ctx.sigs.get(name).map(|s| s.bits.clone()).unwrap_or_default()
+                });
+                let muxed = build_bus_mux(ctx, cond_bit, then_bits.clone(), else_bits);
+                drives.insert(name.clone(), muxed);
+            }
+        }
+        Stmt::Case { expr, items } => {
+            process_case_stmt(ctx, expr, items, drives);
+        }
+        Stmt::Block(stmts) => {
+            for s in stmts {
+                process_comb_stmt(ctx, s, drives);
+            }
+        }
+    }
+}
+
+fn snapshot_drives(drives: &HashMap<String, Vec<BitId>>) -> HashMap<String, Vec<BitId>> {
+    drives.clone()
+}
+
+/// Write a target expression's bits into the drives map, handling
+/// partial assignments (BitSel, Range) correctly.
+fn overlay_drive(
+    ctx: &Ctx,
+    target: &Expr,
+    target_bits: Vec<BitId>,
+    value_bits: Vec<BitId>,
+    drives: &mut HashMap<String, Vec<BitId>>,
+) {
+    let name = extract_target_name(target);
+    let entry = drives.entry(name.clone()).or_insert_with(|| {
+        ctx.sigs.get(&name).map(|s| s.bits.clone()).unwrap_or_default()
+    });
+    // Map target bit ID to position within entry, then write value bit.
+    for (i, &tb) in target_bits.iter().enumerate() {
+        if let Some(pos) = entry.iter().position(|&b| b == tb) {
+            if let Some(&vb) = value_bits.get(i) {
+                entry[pos] = vb;
+            }
+        }
+    }
+}
+
+fn extract_target_name(expr: &Expr) -> String {
+    match expr {
+        Expr::Ident(name) => name.clone(),
+        Expr::BitSel { base, .. } => extract_target_name(base),
+        Expr::Range { base, .. } => extract_target_name(base),
+        Expr::Concat(exprs) => extract_target_name(&exprs[0]),
+        _ => String::new(),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Case statement synthesis
+// ---------------------------------------------------------------------------
+
+fn process_case_stmt(
+    ctx: &mut Ctx,
+    expr: &Expr,
+    items: &[CaseItem],
+    drives: &mut HashMap<String, Vec<BitId>>,
+) {
+    let case_bits = ctx.resolve_expr(expr);
+
+    // Step 1: for each item, compute match condition and statement drives
+    struct ItemPrep {
+        match_cond: Option<BitId>,
+        item_drives: HashMap<String, Vec<BitId>>,
+    }
+
+    let mut prep: Vec<ItemPrep> = Vec::new();
+    let mut default_idx: Option<usize> = None;
+
+    for (idx, item) in items.iter().enumerate() {
+        let match_cond = if item.exprs.is_empty() {
+            default_idx = Some(idx);
+            None
+        } else {
+            let mut acc: Option<BitId> = None;
+            for item_expr in &item.exprs {
+                let item_bits = ctx.resolve_expr(item_expr);
+                let eq = build_eq_bit(ctx, &case_bits, &item_bits);
+                acc = Some(match acc {
+                    None => eq,
+                    Some(prev) => build_or(ctx, prev, eq),
+                });
+            }
+            acc
+        };
+
+        // Process item's statements to get local drives
+        let mut item_drives = HashMap::new();
+        for stmt in &item.stmts {
+            process_comb_stmt(ctx, stmt, &mut item_drives);
+        }
+
+        prep.push(ItemPrep { match_cond, item_drives });
+    }
+
+    // Step 2: synthesize default match condition
+    if let Some(di) = default_idx {
+        let mut others: Vec<BitId> = Vec::new();
+        for (j, p) in prep.iter().enumerate() {
+            if j != di {
+                if let Some(c) = p.match_cond {
+                    others.push(c);
+                }
+            }
+        }
+        if !others.is_empty() {
+            let or_all = build_or_chain(ctx, &others);
+            let not_bit = ctx.net.alloc_bit();
+            ctx.net.add_cell(CellKind::Not, vec![("A", vec![or_all])], vec![("Y", vec![not_bit])]);
+            prep[di].match_cond = Some(not_bit);
+        }
+    }
+
+    // Step 3: for each unique target, build MUX chain from items
+    let all_targets: HashSet<String> = prep.iter()
+        .flat_map(|p| p.item_drives.keys().cloned())
+        .collect();
+
+    for target_name in all_targets {
+        let default_bits = drives.get(&target_name).cloned().unwrap_or_default();
+
+        let mut current = default_bits;
+
+        for (idx, p) in prep.iter().enumerate() {
+            if let Some(cond) = p.match_cond {
+                if let Some(item_bits) = p.item_drives.get(&target_name) {
+                    if !item_bits.is_empty() {
+                        current = build_bus_mux(ctx, cond, item_bits.clone(), current);
+                    }
+                }
+            } else if let Some(item_bits) = p.item_drives.get(&target_name) {
+                // default case: directly use the item value
+                if !item_bits.is_empty() {
+                    current = item_bits.clone();
+                }
+            }
+        }
+
+        drives.insert(target_name, current);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Helper cells
+// ---------------------------------------------------------------------------
+
+/// Build a 1-bit equality check: returns a single bit that is 1 iff all bits match.
+fn build_eq_bit(ctx: &mut Ctx, a: &[BitId], b: &[BitId]) -> BitId {
+    let max_len = a.len().max(b.len());
+    let mut la = a.to_vec();
+    let mut ra = b.to_vec();
+    if la.len() < max_len { let fill = *la.last().unwrap_or(&0); la.resize(max_len, fill); }
+    if ra.len() < max_len { let fill = *ra.last().unwrap_or(&0); ra.resize(max_len, fill); }
+
+    let mut eq_bits = Vec::new();
+    for i in 0..max_len {
+        // xnor = not(xor)
+        let x = ctx.net.alloc_bit();
+        ctx.net.add_cell(CellKind::Xor, vec![("A", vec![la[i]]), ("B", vec![ra[i]])], vec![("Y", vec![x])]);
+        let n = ctx.net.alloc_bit();
+        ctx.net.add_cell(CellKind::Not, vec![("A", vec![x])], vec![("Y", vec![n])]);
+        eq_bits.push(n);
+    }
+
+    // AND all eq_bits together
+    if eq_bits.is_empty() { return ctx.net.alloc_bit(); } // will be const1
+    let mut acc = eq_bits[0];
+    for &b in &eq_bits[1..] {
+        let o = ctx.net.alloc_bit();
+        ctx.net.add_cell(CellKind::And, vec![("A", vec![acc]), ("B", vec![b])], vec![("Y", vec![o])]);
+        acc = o;
+    }
+    acc
+}
+
+fn build_or(ctx: &mut Ctx, a: BitId, b: BitId) -> BitId {
+    let o = ctx.net.alloc_bit();
+    ctx.net.add_cell(CellKind::Or, vec![("A", vec![a]), ("B", vec![b])], vec![("Y", vec![o])]);
+    o
+}
+
+fn build_or_chain(ctx: &mut Ctx, bits: &[BitId]) -> BitId {
+    if bits.is_empty() {
+        let z = ctx.net.alloc_bit();
+        ctx.net.add_cell(CellKind::Const0, vec![], vec![("Y", vec![z])]);
+        return z;
+    }
+    let mut acc = bits[0];
+    for &b in &bits[1..] {
+        acc = build_or(ctx, acc, b);
+    }
+    acc
+}
+
+/// Build a 1-bit 2-to-1 MUX: Y = sel ? B : A
+fn build_mux2(ctx: &mut Ctx, sel: BitId, b: BitId, a: BitId) -> BitId {
+    let o = ctx.net.alloc_bit();
+    ctx.net.add_cell(CellKind::Mux2, vec![("A", vec![a]), ("B", vec![b]), ("S", vec![sel])], vec![("Y", vec![o])]);
+    o
+}
+
+/// Build a multi-bit MUX: each bit is sel ? then_bits[i] : else_bits[i]
+fn build_bus_mux(ctx: &mut Ctx, sel: BitId, then_bits: Vec<BitId>, else_bits: Vec<BitId>) -> Vec<BitId> {
+    let max_len = then_bits.len().max(else_bits.len());
+    let mut out = Vec::new();
+    for i in 0..max_len {
+        let t = then_bits.get(i).copied().unwrap_or(0);
+        let e = else_bits.get(i).copied().unwrap_or(0);
+        out.push(build_mux2(ctx, sel, t, e));
+    }
+    out
 }

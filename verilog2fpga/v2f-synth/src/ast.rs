@@ -72,11 +72,18 @@ pub struct Conn {
 }
 
 #[derive(Debug, Clone)]
+pub struct CaseItem {
+    pub exprs: Vec<Expr>,
+    pub stmts: Vec<Stmt>,
+}
+
+#[derive(Debug, Clone)]
 pub enum Stmt {
     Blocking { target: Expr, value: Expr },
     Nonblocking { target: Expr, value: Expr },
     If { cond: Expr, then: Vec<Stmt>, else_: Option<Vec<Stmt>> },
     Block(Vec<Stmt>),
+    Case { expr: Expr, items: Vec<CaseItem> },
 }
 
 #[derive(Debug, Clone)]

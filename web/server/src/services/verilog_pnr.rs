@@ -1,3 +1,4 @@
+use std::panic;
 use crate::protocol::{Request, Response};
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use v2f_core::Device as CoreDevice;
@@ -27,12 +28,27 @@ fn handle_pnr(code: String, device: Option<String>, top: Option<String>) -> Resp
         Err(e) => return Response::Error { error: format!("Invalid device '{}': {}", dev_str, e) },
     };
     let top_name = top.unwrap_or_else(|| "top".to_string());
-
     let ice_dev = device_to_ice40(dev);
 
-    let json = v2f_synth::synthesize(&code, &top_name);
+    let json = match panic::catch_unwind(|| v2f_synth::synthesize(&code, &top_name)) {
+        Ok(j) => j,
+        Err(e) => {
+            let msg = if let Some(s) = e.downcast_ref::<&str>() { s.to_string() }
+                      else if let Some(s) = e.downcast_ref::<String>() { s.clone() }
+                      else { "synthesis panic (unsupported Verilog construct)".into() };
+            return Response::Error { error: format!("Synthesis error: {}", msg) };
+        }
+    };
 
-    let asc = v2f_pnr::run_pnr(&json, dev);
+    let asc = match panic::catch_unwind(|| v2f_pnr::run_pnr(&json, dev)) {
+        Ok(a) => a,
+        Err(e) => {
+            let msg = if let Some(s) = e.downcast_ref::<&str>() { s.to_string() }
+                      else if let Some(s) = e.downcast_ref::<String>() { s.clone() }
+                      else { "PnR panic".into() };
+            return Response::Error { error: format!("PnR error: {}", msg) };
+        }
+    };
 
     let asc_parsed = match v2f_bitstream::parse_asc(&asc) {
         Ok(a) => a,

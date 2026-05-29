@@ -134,22 +134,9 @@ function handleResponse(resp) {
       }
       break;
     }
-    case 'bitstream_decode_result': {
-      const outEl = document.getElementById('decode-output');
-      if (resp.error) {
-        outEl.textContent = `Error: ${resp.error}`;
-        outEl.className = 'output error';
-      } else {
-        outEl.textContent = `Device: ${resp.device}\nCRC Valid: ${resp.crc_valid}\nFormat: ${resp.tiles.format || 'v2f-bitdecode-v2'}\n`;
-        outEl.textContent += `Decode Level: ${resp.tiles.decode_level || 'wiring'}\n`;
-        outEl.textContent += `Total Tiles: ${resp.tiles.num_tiles || resp.tiles.tiles ? Object.keys(resp.tiles.tiles || {}).length : '?'}\n`;
-        outEl.className = 'output success';
-      }
-      break;
-    }
     case 'error': {
       const errorMsg = resp.error || 'Unknown error';
-      ['verilog-output', 'pnr-output', 'spice-output', 'decode-output'].forEach(id => {
+      ['verilog-output', 'pnr-output', 'spice-output'].forEach(id => {
         const el = document.getElementById(id);
         if (el && !el.classList.contains('success')) {
           el.textContent = `Error: ${errorMsg}`;
@@ -206,21 +193,6 @@ function runSpiceAnalyze(_useHttp) {
     sendWs(req);
   } else {
     sendHttp('POST', '/api/spice/analyze', { code, analysis, ac_freq_start: null, ac_freq_end: null, ac_points: null, tran_start: null, tran_end: null, tran_step: null }).then(handleResponse);
-  }
-}
-
-function runBitstreamDecode(_useHttp) {
-  const bin = document.getElementById('decode-code').value.trim();
-  if (!bin) { alert('Please paste a base64 bitstream'); return; }
-  const outEl = document.getElementById('decode-output');
-  outEl.textContent = 'Decoding bitstream...';
-  outEl.className = 'output info';
-
-  const req = { type: 'bitstream_decode', bin_base64: bin };
-  if (wsReady) {
-    sendWs(req);
-  } else {
-    sendHttp('POST', '/api/bitstream/decode', { bin_base64: bin }).then(handleResponse);
   }
 }
 
@@ -763,11 +735,6 @@ endmodule`,
 endmodule`,
 };
 
-const BITSTREAM_EXAMPLES = {
-  blinky_hx1k: null,
-  halfadd_hx1k: null,
-  mux2_hx1k: null,
-};
 
 document.getElementById('verilog-examples').addEventListener('change', function() {
   if (this.value) {
@@ -796,107 +763,6 @@ document.getElementById('pnr-examples').addEventListener('change', function() {
       document.getElementById('pnr-code').value = code;
       this.value = '';
     }
-  }
-});
-
-let pendingDecodeBin = null;
-
-document.getElementById('decode-examples').addEventListener('change', function() {
-  const val = this.value;
-  if (!val) return;
-  this.value = '';
-
-  if (val === 'run_pnr_blinky') {
-    const code = PNR_EXAMPLES.blinky;
-    const outEl = document.getElementById('pnr-output');
-    outEl.textContent = 'Running PnR for decode...';
-    outEl.className = 'output info';
-    const req = { type: 'verilog_pnr', code, device: 'hx1k', top: 'top' };
-    if (wsReady) {
-      const origHandler = handleResponse;
-      window._pendingDecodeHandler = (resp) => {
-        if (resp.type === 'verilog_pnr_result') {
-          pendingDecodeBin = resp.bin_base64;
-          document.getElementById('decode-code').value = resp.bin_base64;
-          const decEl = document.getElementById('decode-output');
-          decEl.textContent = `PnR done. ${resp.bin_base64.length} chars loaded. Click "Decode Bitstream" to decode.`;
-          decEl.className = 'output info';
-          document.querySelector('[data-tab="bitstream"]').click();
-        }
-        handleResponse = origHandler;
-      };
-      handleResponse = (resp) => {
-        if (resp.type === 'verilog_pnr_result' || resp.type === 'error') {
-          window._pendingDecodeHandler(resp);
-        } else {
-          origHandler(resp);
-        }
-      };
-      sendWs(req);
-    } else {
-      sendHttp('POST', '/api/verilog/pnr', { code, device: 'hx1k', top: 'top' }).then((resp) => {
-        if (resp.type === 'verilog_pnr_result') {
-          pendingDecodeBin = resp.bin_base64;
-          document.getElementById('decode-code').value = resp.bin_base64;
-          const decEl = document.getElementById('decode-output');
-          decEl.textContent = `PnR done. ${resp.bin_base64.length} chars loaded. Click "Decode Bitstream" to decode.`;
-          decEl.className = 'output info';
-          document.querySelector('[data-tab="bitstream"]').click();
-        } else {
-          handleResponse(resp);
-        }
-      });
-    }
-    return;
-  }
-
-  if (val === 'run_pnr_halfadd') {
-    const code = PNR_EXAMPLES.halfadd;
-    const outEl = document.getElementById('pnr-output');
-    outEl.textContent = 'Running PnR for decode...';
-    outEl.className = 'output info';
-    const req = { type: 'verilog_pnr', code, device: 'hx1k', top: 'top' };
-    if (wsReady) {
-      const origHandler = handleResponse;
-      handleResponse = (resp) => {
-        if (resp.type === 'verilog_pnr_result' || resp.type === 'error') {
-          if (resp.type === 'verilog_pnr_result') {
-            pendingDecodeBin = resp.bin_base64;
-            document.getElementById('decode-code').value = resp.bin_base64;
-            const decEl = document.getElementById('decode-output');
-            decEl.textContent = `PnR done. ${resp.bin_base64.length} chars loaded. Click "Decode Bitstream" to decode.`;
-            decEl.className = 'output info';
-            document.querySelector('[data-tab="bitstream"]').click();
-          }
-          handleResponse = origHandler;
-        } else {
-          origHandler(resp);
-        }
-      };
-      sendWs(req);
-    } else {
-      sendHttp('POST', '/api/verilog/pnr', { code, device: 'hx1k', top: 'top' }).then((resp) => {
-        if (resp.type === 'verilog_pnr_result') {
-          pendingDecodeBin = resp.bin_base64;
-          document.getElementById('decode-code').value = resp.bin_base64;
-          const decEl = document.getElementById('decode-output');
-          decEl.textContent = `PnR done. ${resp.bin_base64.length} chars loaded. Click "Decode Bitstream" to decode.`;
-          decEl.className = 'output info';
-          document.querySelector('[data-tab="bitstream"]').click();
-        } else {
-          handleResponse(resp);
-        }
-      });
-    }
-    return;
-  }
-
-  const bin = BITSTREAM_EXAMPLES[val];
-  if (bin) {
-    document.getElementById('decode-code').value = bin;
-    const decEl = document.getElementById('decode-output');
-    decEl.textContent = `Example "${val}" loaded (${bin.length} chars). Click "Decode Bitstream" to decode.`;
-    decEl.className = 'output info';
   }
 });
 
@@ -1443,8 +1309,5 @@ document.getElementById('btn-pnr-clear').addEventListener('click', () => {
 });
 document.getElementById('btn-spice-run').addEventListener('click', () => runSpiceAnalyze(false));
 document.getElementById('btn-spice-clear').addEventListener('click', () => clearOutput('spice-output'));
-document.getElementById('btn-decode-run').addEventListener('click', () => runBitstreamDecode(false));
-document.getElementById('btn-decode-clear').addEventListener('click', () => clearOutput('decode-output'));
-
 // Start WebSocket connection
 connectWs();

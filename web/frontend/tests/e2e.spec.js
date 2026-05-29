@@ -31,11 +31,10 @@ test.describe('EDA4 Web E2E', () => {
     await expect(page).toHaveTitle(/EDA4 Web/);
   });
 
-  test('all four tabs are present', async () => {
+  test('all three tabs are present', async () => {
     await expect(page.locator('.tab[data-tab="verilog-sim"]')).toBeVisible();
     await expect(page.locator('.tab[data-tab="verilog-pnr"]')).toBeVisible();
     await expect(page.locator('.tab[data-tab="spice"]')).toBeVisible();
-    await expect(page.locator('.tab[data-tab="bitstream"]')).toBeVisible();
   });
 
   test('verilog sim tab is active by default', async () => {
@@ -47,9 +46,6 @@ test.describe('EDA4 Web E2E', () => {
     await page.click('.tab[data-tab="spice"]');
     await expect(page.locator('#panel-spice')).toBeVisible();
     await expect(page.locator('#panel-verilog-sim')).not.toBeVisible();
-
-    await page.click('.tab[data-tab="bitstream"]');
-    await expect(page.locator('#panel-bitstream')).toBeVisible();
   });
 
   test('verilog sim sends request via HTTP fallback', async () => {
@@ -104,17 +100,6 @@ test.describe('EDA4 Web E2E', () => {
     await expect(output).not.toHaveText(/Ready\./, { timeout: 60000 });
     const text = await output.textContent();
     console.log('PnR output:', text.slice(0, 200));
-  });
-
-  test('bitstream decode with invalid input shows error', async () => {
-    await page.click('.tab[data-tab="bitstream"]');
-    await page.fill('#decode-code', '!!!invalid!!!');
-    await page.click('#btn-decode-run');
-
-    const output = page.locator('#decode-output');
-    await expect(output).toContainText(/error|Error/i, { timeout: 15000 });
-    const text = await output.textContent();
-    console.log('Bitstream decode error:', text.slice(0, 200));
   });
 
   test('WebSocket status indicator exists', async () => {

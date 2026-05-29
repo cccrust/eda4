@@ -31,10 +31,6 @@ pub enum Request {
         #[serde(default)]
         tran_step: Option<f64>,
     },
-    #[serde(rename = "bitstream_decode")]
-    BitstreamDecode {
-        bin_base64: String,
-    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -70,12 +66,6 @@ pub enum Response {
         ac: Option<super::AcResult>,
         transient: Option<super::TransientResult>,
         ascii_circuit: String,
-    },
-    #[serde(rename = "bitstream_decode_result")]
-    BitstreamDecodeResult {
-        device: String,
-        crc_valid: bool,
-        tiles: serde_json::Value,
     },
     #[serde(rename = "error")]
     Error { error: String },

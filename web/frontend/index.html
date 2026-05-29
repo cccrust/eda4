@@ -61,7 +61,6 @@
     <button class="tab active" data-tab="verilog-sim">Verilog Simulation</button>
     <button class="tab" data-tab="verilog-pnr">Verilog PnR (FPGA)</button>
     <button class="tab" data-tab="spice">SPICE Simulation</button>
-    <button class="tab" data-tab="bitstream">Bitstream Decode</button>
   </div>
 
   <!-- Verilog Simulation -->
@@ -212,31 +211,6 @@ R2 Vout gnd 1k
     </div>
   </div>
 
-  <!-- Bitstream Decode -->
-  <div class="panel" id="panel-bitstream" style="display:none">
-    <div class="toolbar">
-      <button class="primary" id="btn-decode-run">Decode Bitstream</button>
-      <select id="decode-examples">
-        <option value="">Load Example...</option>
-        <option value="blinky_hx1k">Blinky HX1K (LED counter)</option>
-        <option value="halfadd_hx1k">HalfAdder HX1K</option>
-        <option value="mux2_hx1k">Mux2 HX1K</option>
-        <option value="run_pnr_blinky">Run PnR: Blinky → Decode</option>
-        <option value="run_pnr_halfadd">Run PnR: HalfAdder → Decode</option>
-      </select>
-      <button id="btn-decode-clear">Clear Output</button>
-    </div>
-    <div class="split">
-      <div class="editor-pane">
-        <div class="pane-label">Bitstream (Base64)</div>
-        <textarea id="decode-code" placeholder="Paste base64-encoded .bin bitstream here..."></textarea>
-      </div>
-      <div class="output-pane">
-        <div class="pane-label">Decoded Result</div>
-        <div class="output" id="decode-output">Ready. Paste base64 bitstream and click "Decode".</div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="js/app.js"></script>

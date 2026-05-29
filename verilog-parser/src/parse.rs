@@ -217,28 +217,32 @@ impl Parser {
             return Module { name, ports, items, params };
         }
         self.expect_lparen();
-        let mut port_names = Vec::new();
-        let mut port_dirs = Vec::new();
+        struct AnsiEntry { name: String, dir: Option<PortDir>, width: Option<Range> }
+        let mut ansi_ports: Vec<AnsiEntry> = Vec::new();
+        let mut cur_dir: Option<PortDir> = None;
+        let mut cur_width: Option<Range> = None;
         if !self.at(Token::RParen) {
             loop {
-                let dir = match self.toks.get(self.pos) {
-                    Some(Token::Input) => { self.pos += 1; Some(PortDir::Input) }
-                    Some(Token::Output) => { self.pos += 1; Some(PortDir::Output) }
-                    Some(Token::Inout) => { self.pos += 1; Some(PortDir::Inout) }
-                    _ => None,
-                };
-                if self.at(Token::Reg) { self.pos += 1; }
-                let _width = self.parse_range_opt();
+                match self.toks.get(self.pos) {
+                    Some(Token::Input) => { self.pos += 1; cur_dir = Some(PortDir::Input); cur_width = self.parse_range_opt(); }
+                    Some(Token::Output) => { self.pos += 1; cur_dir = Some(PortDir::Output); if self.at(Token::Reg) { self.pos += 1; } cur_width = self.parse_range_opt(); }
+                    Some(Token::Inout) => { self.pos += 1; cur_dir = Some(PortDir::Inout); cur_width = self.parse_range_opt(); }
+                    Some(Token::Reg) => { self.pos += 1; cur_width = self.parse_range_opt(); }
+                    _ => {}
+                }
                 let name = self.expect_ident();
-                port_names.push(name);
-                port_dirs.push(dir);
+                ansi_ports.push(AnsiEntry { name, dir: cur_dir, width: cur_width.clone() });
                 if self.at(Token::Comma) { self.pos += 1; } else { break; }
             }
         }
         self.expect_rparen();
         self.expect_semi();
 
-        let (port_decls, items) = self.parse_port_decls_and_body_with_ansi_ports(&mut params, port_names, port_dirs);
+        let port_names: Vec<String> = ansi_ports.iter().map(|e| e.name.clone()).collect();
+        let port_dirs: Vec<Option<PortDir>> = ansi_ports.iter().map(|e| e.dir).collect();
+        let port_widths: Vec<Option<Range>> = ansi_ports.iter().map(|e| e.width.clone()).collect();
+
+        let (port_decls, items) = self.parse_port_decls_and_body_with_ansi_ports(&mut params, port_names, port_dirs, port_widths);
 
         let ports: Vec<Port> = port_decls.into_iter().map(|(n, d, w)| Port { direction: d, name: n, width: w }).collect();
         Module { name, ports, items, params }
@@ -333,14 +337,14 @@ impl Parser {
         (port_decls, items)
     }
 
-    fn parse_port_decls_and_body_with_ansi_ports(&mut self, params: &mut HashMap<String, u64>, ansi_port_names: Vec<String>, ansi_port_dirs: Vec<Option<PortDir>>) -> (Vec<(String, PortDir, Option<Range>)>, Vec<ModuleItem>) {
+    fn parse_port_decls_and_body_with_ansi_ports(&mut self, params: &mut HashMap<String, u64>, ansi_port_names: Vec<String>, ansi_port_dirs: Vec<Option<PortDir>>, ansi_port_widths: Vec<Option<Range>>) -> (Vec<(String, PortDir, Option<Range>)>, Vec<ModuleItem>) {
         let mut port_decls: Vec<(String, PortDir, Option<Range>)> = Vec::new();
         let mut items: Vec<ModuleItem> = Vec::new();
         let mut declared_names: std::collections::HashSet<String> = std::collections::HashSet::new();
 
-        for (name, dir) in ansi_port_names.into_iter().zip(ansi_port_dirs.into_iter()) {
+        for ((name, dir), width) in ansi_port_names.into_iter().zip(ansi_port_dirs.into_iter()).zip(ansi_port_widths.into_iter()) {
             if let Some(d) = dir {
-                port_decls.push((name.clone(), d, None));
+                port_decls.push((name.clone(), d, width));
                 declared_names.insert(name);
             }
         }

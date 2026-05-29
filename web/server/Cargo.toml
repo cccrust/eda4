@@ -19,7 +19,6 @@ verilog2rust = { path = "../../verilog2rust" }
 v2f-synth = { path = "../../verilog2fpga/v2f-synth" }
 v2f-pnr = { path = "../../verilog2fpga/v2f-pnr" }
 v2f-bitstream = { path = "../../verilog2fpga/v2f-bitstream" }
-v2f-bitdecode = { path = "../../verilog2fpga/v2f-bitdecode" }
 v2f-core = { path = "../../verilog2fpga/v2f-core" }
 v2f-db = { path = "../../verilog2fpga/v2f-db" }
 ruspice = { path = "../../ruspice" }

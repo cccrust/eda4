@@ -3,7 +3,7 @@
 //! This module provides a conversion layer that adapts verilog-parser's parser
 //! output to v2f-synth's internal AST types.
 
-use crate::ast::*;
+use crate::ast::{self, *};
 use verilog_parser::parse_verilog as v2r_parse;
 use verilog_parser::ast as v2r;
 
@@ -118,6 +118,13 @@ fn convert_stmt(stmt: v2r::Stmt) -> Option<Stmt> {
             cond: convert_expr(cond),
             then: then.into_iter().filter_map(convert_stmt).collect(),
             else_: if else_.is_empty() { None } else { Some(else_.into_iter().filter_map(convert_stmt).collect()) },
+        }),
+        v2r::Stmt::Case { expr, items } => Some(Stmt::Case {
+            expr: convert_expr(expr),
+            items: items.into_iter().map(|item| CaseItem {
+                exprs: item.exprs.into_iter().map(convert_expr).collect(),
+                stmts: item.stmts.into_iter().filter_map(convert_stmt).collect(),
+            }).collect(),
         }),
         v2r::Stmt::For { .. } => None,
         _ => None,

@@ -33,11 +33,6 @@ struct ApiSpiceAnalyze {
     tran_step: Option<f64>,
 }
 
-#[derive(Debug, Deserialize)]
-struct ApiBitstreamDecode {
-    bin_base64: String,
-}
-
 #[derive(Clone)]
 struct AppState {}
 
@@ -136,13 +131,6 @@ async fn api_spice_analyze(_state: web::Data<AppState>, body: web::Json<ApiSpice
     HttpResponse::Ok().json(&resp)
 }
 
-async fn api_bitstream_decode(_state: web::Data<AppState>, body: web::Json<ApiBitstreamDecode>) -> impl Responder {
-    let resp = handle_request(Request::BitstreamDecode {
-        bin_base64: body.bin_base64.clone(),
-    });
-    HttpResponse::Ok().json(&resp)
-}
-
 async fn index_handler() -> impl Responder {
     let html = include_str!("../../frontend/index.html");
     HttpResponse::Ok()
@@ -160,7 +148,7 @@ async fn main() -> std::io::Result<()> {
         .init();
 
     info!("EDA4 Web Server starting on http://0.0.0.0:8080");
-    info!("REST: POST /api/verilog/simulate, /api/verilog/pnr, /api/spice/analyze, /api/bitstream/decode");
+    info!("REST: POST /api/verilog/simulate, /api/verilog/pnr, /api/spice/analyze");
     info!("WebSocket: GET /ws");
 
     let bind_addr = "0.0.0.0:8080";
@@ -172,7 +160,6 @@ async fn main() -> std::io::Result<()> {
             .route("/api/verilog/simulate", web::post().to(api_verilog_sim))
             .route("/api/verilog/pnr", web::post().to(api_verilog_pnr))
             .route("/api/spice/analyze", web::post().to(api_spice_analyze))
-            .route("/api/bitstream/decode", web::post().to(api_bitstream_decode))
             .service(actix_files::Files::new("/js", "frontend/js").show_files_listing())
     })
     .bind(bind_addr)?
@@ -485,29 +472,4 @@ endmodule"#;
         assert_sim_ok(sim_test(examples::FSM), "FSM");
     }
 
-    #[tokio::test]
-    async fn test_bitstream_decode_invalid_base64() {
-        let resp = handle_request(Request::BitstreamDecode { bin_base64: "!!!invalid!!!".into() });
-        assert!(matches!(resp, Response::Error { .. }));
-    }
-
-    #[tokio::test]
-    async fn test_bitstream_decode_empty_hx1k() {
-        use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
-        use v2f_bitstream::{pack_bitstream, Cram};
-        use v2f_db::ice40::Ice40Device;
-        let dev = Ice40Device::HX1K;
-        let cram = Cram::new(dev);
-        let bin = pack_bitstream(&cram);
-        let b64 = BASE64.encode(&bin);
-        let resp = handle_request(Request::BitstreamDecode { bin_base64: b64 });
-        match resp {
-            Response::BitstreamDecodeResult { device, crc_valid, tiles } => {
-                assert_eq!(device, "hx1k");
-                assert!(crc_valid);
-                assert!(tiles.get("format").is_some());
-            }
-            _ => panic!("Expected BitstreamDecodeResult"),
-        }
-    }
 }
