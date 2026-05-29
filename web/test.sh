@@ -1,0 +1,1 @@
+cargo test -p eda4-web-server

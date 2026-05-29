@@ -1,84 +1,68 @@
 # eda4 — Agent Guide
 
-Rust EDA monorepo with two sub-projects: **verilog2fpga** (FPGA toolchain) and **verilog2rust** (Verilog→Rust HDL translator). Both are Rust 2021 edition.
+Rust EDA monorepo. Each sub-project is its own Cargo workspace with an independent lockfile.
 
-## Directory layout
+## Top-level layout
 
-```
-verilog2fpga/     Rust workspace (11 crates)
-  v2f-core/        Shared: Device enum (HX1K/HX4K/HX8K/LP1K/UP5K), Config, V2fError
-  v2f-cli/         Binary crate `v2f` — clap CLI (build/synth/pnr/pack/prog/list-devices/check)
-  v2f-synth/       Pure-Rust Verilog synthesis (parser → techmap → netlist → JSON)
-  v2f-pnr/         Pure-Rust place & route (simulated annealing)
-  v2f-bitstream/   ASC → CRAM → BIN bitstream packing (fixtures: _fixtures/*.asc)
-  v2f-bitdecode/   BIN → JSON decoder (v2f-bitdecode-v2 format, wiring decode level)
-  v2f-programmer/  FPGA programmer (mock JTAG/SPI, optional `ftdi` feature for real hardware)
-  v2f-rust/        Rust HDL (`fpga!` macro) → JSON compile → Verilog backend
-  v2f-rust-macros/ proc-macro crate for the `fpga!` DSL
-  v2f-db/          iCE40 device database (tile/CRAM address maps)
-  v2f-viz/         eframe GUI binary `v2f-viz` for visualizing JSON+ASC
-  examples/        blinky (v/pcf), adder (v)
-verilog-parser/   Shared Verilog parser crate (standalone, used by v2f-synth)
-  src/parse.rs     Tokenizer + parser
-  src/ast.rs       AST types (Module, Port, Expr, Stmt, etc.)
-verilog2rust/     Single crate: binary + library
-  src/verilog/     Verilog tokenizer/parser/AST → code generator
-  src/rhdl/        Simulation runtime (Signal, Gate trait, sim harness)
-  verilog/         Example designs & testbenches (.v + .rhdl)
-  verilog/hackcpu/ Hack CPU (gate-level, memory, mux, PC, ALU)
-  verilog/mcu0m/   MCU0m simulation
-  tests/           Comprehensive tests (parsing, codegen, syntax round-trip)
-```
+| Path | Description |
+|---|---|
+| `verilog2fpga/` | Workspace (9 crates) — FPGA toolchain: synth, PnR, bitstream, programmer |
+| `verilog2rust/` | Single crate — Verilog→Rust HDL translator + runtime |
+| `verilog-parser/` | Standalone Verilog parser (used by v2f-synth AND verilog2rust) |
+| `ruspice/` | Analog circuit simulator (see `ruspice/AGENTS.md`) |
+| `web/` | Web workspace — `eda4-web-server` (actix-web) + static frontend + Playwright e2e |
+| `_wiki/` | Internal design docs (43 markdown files) |
 
 ## Commands
 
-### verilog2fpga
+### verilog2fpga workspace
 
-| Command | Description |
-|---|---|
-| `cargo build` | Build all workspace crates |
-| `cargo test` | Test all workspace crates |
-| `cargo test -p <crate>` | Test single crate (e.g., `-p v2f-core`, `-p v2f-bitstream`) |
-| `cargo run -p v2f-viz -- <input.json> <input.asc>` | Launch GUI visualization |
-| `./test.sh` | `cargo build && cargo test` |
-| `./run.sh` | Full E2E pipeline (build blinky/adder via pure Rust and yosys) |
+```
+cargo build                  # build all 9 workspace crates
+cargo test                   # test all
+cargo test -p <crate>        # test single crate (v2f-core, v2f-bitstream, etc.)
+cargo run -p v2f-viz -- <json> <asc>   # GUI visualization
+./test.sh                    # cargo build && cargo test
+./run.sh                     # full E2E pipeline → _out/
+```
 
-The `v2f` binary supports `--backend auto` (try yosys/nextpnr/icepack, fallback Rust), `--backend pure-rust` (Rust only), `--backend yosys`, `--backend pnr-only`. Default device is `hx8k`. Output files get `.json`, `.asc`, `.bin` suffixes appended to `--output`.
+`v2f` binary (`v2f-cli`): `build`, `synth`, `pnr`, `pack`, `prog`, `list-devices`, `check`. Backends: `auto` (default), `pure-rust`, `yosys`, `pnr-only`. Default device `hx8k`. Output files get `.json`, `.asc`, `.bin` suffixes.
 
 ### verilog2rust
 
-| Command | Description |
-|---|---|
-| `cargo build` | Build crate |
-| `cargo test` | Run tests (no test binary to run; pure `#[test]` tests) |
-| `cargo run -- <file.v>` | Convert Verilog → ruHDL |
-| `cargo run -- <file.v> <output.rs>` | Convert with explicit output path |
-| `cargo run -- <file.rhdl>` | Compile and run ruHDL |
-| `./run.sh` | Convert all `verilog/*.v` files + run tests |
-| `./run_tb.sh` | Build + convert testbenches + run them |
-| `./test.sh` | `cargo test` |
-
-Set `RUST_BACKTRACE=1` when debugging verilog2rust (used by default in scripts).
-
-### External tools (optional, macOS)
-
-```sh
-brew install yosys icestorm openfpgaloader
-brew install nextpnr-ice40  # or: brew tap siliconwitchery/oss-fpga && brew install --HEAD siliconwitchery/oss-fpga/nextpnr-ice40
+```
+cargo test                   # uses --test-threads=1 (see test.sh)
+cargo run -- <file.v>        # Verilog → ruHDL (stdout)
+cargo run -- <file.v> <out.rs>  # with output path
+cargo run -- <file.rhdl>     # compile & run ruHDL
+./run.sh                     # convert all verilog/*.v + cargo test
+./run_tb.sh                  # convert testbenches (verilog/*_tb.v) + run them
+./test.sh                    # cargo test -- --test-threads=1
 ```
 
-Only needed for `--backend yosys` / `icepack` / physical FPGA programming.
+Always set `RUST_BACKTRACE=1` when debugging verilog2rust (default in scripts).
+
+### web workspace
+
+```
+cargo test -p eda4-web-server   # backend tests
+cargo run -p eda4-web-server     # start server (port 8080)
+cd frontend && npx playwright test  # e2e tests (needs server running)
+```
+
+Frontend is plain HTML+JS (no framework). E2E via Playwright (`tests/e2e.spec.js`).
 
 ### ruspice
 
-Analog circuit simulator — separate crate with its own `ruspice/AGENTS.md`.
+See its own `ruspice/AGENTS.md` — standalone analog simulator with SPICE parser.
 
 ## Architecture notes
 
-- **verilog2fpga** uses a pure-Rust EDA pipeline as default (synth → PNR → bitstream). External yosys/nextpnr/icepack are optional. Pipeline: `.v` → `v2f-synth` (JSON netlist) → `v2f-pnr` (ASC) → `v2f-bitstream` (BIN) → `v2f-programmer` (JEDEC/SPI).
-- **verilog2rust** parses Verilog, generates Rust code using the rhdl runtime (Signal + Gate trait), and can execute via rustc compilation. The library crate is compiled as an rlib (cached via `OnceLock` in tests); `.rhdl` files are compiled as separate binaries.
-- **verilog-parser** is the shared standalone Verilog parser crate, used by v2f-synth. verilog2rust maintains its own independent copy of the same parser types in `src/verilog/ast.rs` and `src/verilog/parse.rs`.
-- **Device support**: iCE40 HX1K, HX4K, HX8K, LP1K, UP5K. Device string is case-insensitive.
-- **Bitstream packing** reads `.asc` (ASCII place-and-route output) and produces `.bin` (bitstream). Fixtures are in `v2f-bitstream/_fixtures/`.
-- **Output directory**: `_out/` (gitignored), created by `run.sh`.
-- **HDL DSL**: `v2f-rust` provides the `fpga!{ module ... }` macro for expressing hardware in Rust syntax, callable from the `v2f build --lang rust` command.
+- **verilog2fpga** pipeline: `.v` → `v2f-synth` (JSON netlist) → `v2f-pnr` (ASC) → `v2f-bitstream` (BIN) → `v2f-programmer` (mock/real JTAG/SPI). Default is pure-Rust; yosys/nextpnr/icepack are optional (`brew install` on macOS).
+- **verilog2rust** depends on `verilog-parser` via path. Testbenches: convert `.v` → `.rhdl` then run `.rhdl` (`run_tb.sh`). MCU0m sim uses `verilog/mcu0m/mcu0m_sim.rs`.
+- **verilog-parser** is shared; both `v2f-synth` and `verilog2rust` use it (verilog2rust via path dep).
+- **web server** depends on crates from across the monorepo: `verilog2rust`, `v2f-*`, `ruspice`, `base64`. Four tabs: Verilog sim, Verilog PnR, SPICE, Bitstream decode.
+- **Device support**: iCE40 HX1K, HX4K, HX8K, LP1K, UP5K (case-insensitive). Default: `hx8k`.
+- **Output dir**: `_out/` (gitignored).
+- **Fixtures**: `v2f-bitstream/_fixtures/*.asc`.
+- **`v2f-rust` / `v2f-rust-macros`**: exist only in docs/wiki (not yet implemented on disk).

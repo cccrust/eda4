@@ -107,6 +107,8 @@ function handleResponse(resp) {
         } catch { jsonEl.textContent = resp.json.substring(0, 1000); }
         ascEl.textContent = resp.asc.substring(0, 1000);
         metaEl.textContent = `Device: ${resp.device} | BIN: ~${binBytes} bytes`;
+        // Load visualization data
+        loadVizData(resp.json, resp.asc);
       }
       break;
     }
@@ -897,6 +899,522 @@ document.getElementById('decode-examples').addEventListener('change', function()
     decEl.className = 'output info';
   }
 });
+
+// ---- FPGA Visualization (Circuit / Layout / Routing) ----
+
+// roundRect polyfill for older browsers
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (typeof r === 'number') r = [r, r, r, r];
+    const [tl, tr, br, bl] = r.map(v => Math.min(v, Math.min(w, h) / 2));
+    this.moveTo(x + tl, y);
+    this.lineTo(x + w - tr, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + tr);
+    this.lineTo(x + w, y + h - br);
+    this.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+    this.lineTo(x + bl, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - bl);
+    this.lineTo(x, y + tl);
+    this.quadraticCurveTo(x, y, x + tl, y);
+    this.closePath();
+    return this;
+  };
+}
+
+let vizState = {
+  netlist: null,
+  layout: null,
+  view: 'circuit',
+  panX: 0, panY: 0,
+  zoom: 1,
+};
+let vizDrag = false, vizDx = 0, vizDy = 0;
+
+function loadVizData(jsonStr, ascStr) {
+  try {
+    vizState.netlist = parseNetlist(jsonStr);
+  } catch (e) { vizState.netlist = null; }
+  try {
+    vizState.layout = parseLayout(ascStr);
+  } catch (e) { vizState.layout = null; }
+  vizState.panX = 0; vizState.panY = 0; vizState.zoom = 1;
+  renderViz();
+}
+
+function parseNetlist(text) {
+  const root = JSON.parse(text);
+  const modules = root.modules;
+  if (!modules) throw new Error('no modules');
+  const key = Object.keys(modules)[0];
+  const mod = modules[key];
+  const cells = {};
+  if (mod.cells) {
+    for (const [name, c] of Object.entries(mod.cells)) {
+      const ports = {};
+      if (c.connections) {
+        for (const [pn, bits] of Object.entries(c.connections)) {
+          ports[pn] = Array.isArray(bits) ? bits.map(b => Number(b)) : [];
+        }
+      }
+      cells[name] = { cell_type: c.type || '?', ports };
+    }
+  }
+  const netnames = {};
+  if (mod.netnames) {
+    for (const [name, n] of Object.entries(mod.netnames)) {
+      netnames[name] = (n.bits || []).map(b => Number(b));
+    }
+  }
+  const ports = {};
+  if (mod.ports) {
+    for (const [name, p] of Object.entries(mod.ports)) {
+      ports[name] = { direction: p.direction || '?', bits: (p.bits || []).map(b => Number(b)) };
+    }
+  }
+  return { cells, netnames, ports };
+}
+
+function parseLayout(text) {
+  let device = '';
+  const tiles = [];
+  const wiring = [];
+  let pending = null;
+  for (const line of text.split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    if (t.startsWith('.device ')) {
+      device = t.slice(8).trim();
+    } else if (t.startsWith('.logic_tile ')) {
+      const parts = t.slice(12).trim().split(/\s+/);
+      if (parts.length >= 2) {
+        const col = parseInt(parts[0]), row = parseInt(parts[1]);
+        if (parts.length >= 6) {
+          tiles.push({ x: col, y: row, cell_name: parts[5].replace(/"/g, '') });
+        } else {
+          pending = { col, row };
+        }
+      }
+    } else if (t.startsWith('.sym') && pending) {
+      const parts = t.split(/\s+/);
+      if (parts.length >= 6) {
+        tiles.push({ x: pending.col, y: pending.row, cell_name: parts[5].replace(/"/g, '') });
+      }
+      pending = null;
+    } else if (t.startsWith('.wiring ')) {
+      const parts = t.slice(8).trim().split(/\s+/);
+      if (parts.length >= 4) {
+        const fc = parseInt(parts[0]), fr = parseInt(parts[1]);
+        const tc = parseInt(parts[2]), tr = (fc === tc) ? fr + 1 : fr;
+        const track = parseInt(parts[3]);
+        wiring.push({ from_col: fc, from_row: fr, to_col: tc, to_row: tr, track });
+      }
+    } else {
+      pending = null;
+    }
+  }
+  let cols, rows;
+  const du = device.toUpperCase();
+  if (du.includes('HX1K') || du.includes('LP1K')) { cols = 16; rows = 28; }
+  else if (du.includes('HX4K')) { cols = 20; rows = 38; }
+  else if (du.includes('HX8K')) { cols = 28; rows = 68; }
+  else if (du.includes('UP5K')) { cols = 22; rows = 38; }
+  else {
+    const mc = tiles.reduce((m, t) => Math.max(m, t.x), 0);
+    const mr = tiles.reduce((m, t) => Math.max(m, t.y), 0);
+    cols = mc + 1; rows = mr + 1;
+  }
+  return { device, tiles, wiring, cols, rows };
+}
+
+// --- Drawing helpers ---
+
+function cellColor(type) {
+  const map = {
+    '$_INPUT_': [70, 70, 120],
+    '$_OUTPUT_': [120, 60, 60],
+    '$_ONE_': [80, 90, 60],
+    '$_ADD_': [60, 90, 120],
+    '$_DFF_P_': [60, 110, 70],
+    '$_AND_': [100, 70, 100],
+  };
+  const c = map[type] || [50, 50, 50];
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+function toScreen(x, y, w, h) {
+  const cx = w / 2 + vizState.panX + vizDx;
+  const cy = h / 2 + vizState.panY + vizDy;
+  return [(x * vizState.zoom + cx), (y * vizState.zoom + cy)];
+}
+
+// --- Circuit view ---
+
+function drawCircuitView(ctx, w, h) {
+  const net = vizState.netlist;
+  if (!net) {
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('No netlist data. Run PnR first.', w/2, h/2);
+    return;
+  }
+  const layerOrder = ['$_INPUT_', '$_OUTPUT_', '$_ONE_', '$_ADD_', '$_DFF_P_', '$_AND_'];
+  const layers = {};
+  for (const l of layerOrder) layers[l] = [];
+  for (const [name, cell] of Object.entries(net.cells)) {
+    const key = cell.cell_type;
+    (layers[key] || (layers[key] = [])).push([name, cell]);
+  }
+
+  const cellW = 120, cellH = 50, gapX = 80, gapY = 30;
+  const positions = {};
+  let col = 0;
+  for (const layerName of layerOrder) {
+    const cells = layers[layerName];
+    if (!cells || !cells.length) continue;
+    const n = cells.length;
+    const totalH = n * cellH + (n - 1) * gapY;
+    let rowOff = -totalH / 2;
+    for (const [name] of cells) {
+      positions[name] = { x: col, y: rowOff + cellH / 2 };
+      rowOff += cellH + gapY;
+    }
+    col += cellW + gapX;
+  }
+
+  if (!Object.keys(positions).length) {
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.font = '14px sans-serif';
+    ctx.fillText('No cells to display', w/2, h/2);
+    return;
+  }
+
+  // Net -> cells mapping
+  const netToCells = {};
+  for (const [name, cell] of Object.entries(net.cells)) {
+    for (const [_, bits] of Object.entries(cell.ports)) {
+      for (const b of bits) {
+        if (!netToCells[b]) netToCells[b] = [];
+        netToCells[b].push(name);
+      }
+    }
+  }
+
+  // Draw edges
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(137, 180, 250, 0.4)';
+  for (const [_, conns] of Object.entries(netToCells)) {
+    if (conns.length < 2) continue;
+    for (let i = 0; i < conns.length; i++) {
+      for (let j = i + 1; j < conns.length; j++) {
+        const pa = positions[conns[i]], pb = positions[conns[j]];
+        if (!pa || !pb) continue;
+        const [sx, sy] = toScreen(pa.x, pa.y, w, h);
+        const [ex, ey] = toScreen(pb.x, pb.y, w, h);
+        const mx = (sx + ex) / 2, my = (sy + ey) / 2;
+        const cp = { x: mx, y: my + 30 * vizState.zoom };
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        for (let t = 1; t <= 20; t++) {
+          const r = t / 20;
+          const mt = 1 - r;
+          const px = mt * mt * sx + 2 * mt * r * cp.x + r * r * ex;
+          const py = mt * mt * sy + 2 * mt * r * cp.y + r * r * ey;
+          ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw cells
+  for (const [name, cell] of Object.entries(net.cells)) {
+    const pos = positions[name];
+    if (!pos) continue;
+    const [sx, sy] = toScreen(pos.x, pos.y, w, h);
+    const cw = cellW * vizState.zoom, ch = cellH * vizState.zoom;
+    const r = cw / 2, b = ch / 2;
+    ctx.fillStyle = cellColor(cell.cell_type);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(sx - r, sy - b, cw, ch, 4);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = `${Math.max(9 * vizState.zoom, 4)}px sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, sx - r + 6, sy);
+    ctx.fillStyle = '#aaa';
+    ctx.textAlign = 'right';
+    ctx.fillText(cell.cell_type, sx + r - 6, sy);
+  }
+}
+
+// --- Layout view ---
+
+function drawLayoutView(ctx, w, h) {
+  const lay = vizState.layout;
+  if (!lay) {
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('No layout data. Run PnR first.', w/2, h/2);
+    return;
+  }
+  const tileW = 14, tileH = 14, gap = 2;
+  const stepX = tileW + gap, stepY = tileH + gap;
+  const ox = -(lay.cols * stepX) / 2, oy = -(lay.rows * stepY) / 2;
+  const tileMap = {};
+  for (const t of lay.tiles) tileMap[`${t.x},${t.y}`] = t;
+
+  for (let row = 0; row < lay.rows; row++) {
+    for (let col = 0; col < lay.cols; col++) {
+      const [sx, sy] = toScreen(ox + col * stepX, oy + row * stepY, w, h);
+      const used = tileMap[`${col},${row}`] !== undefined;
+      ctx.fillStyle = used ? 'rgb(80, 150, 80)' : 'rgba(40, 40, 50, 0.8)';
+      ctx.fillRect(sx, sy, tileW * vizState.zoom, tileH * vizState.zoom);
+      ctx.strokeStyle = 'rgba(60,60,60,0.5)';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(sx, sy, tileW * vizState.zoom, tileH * vizState.zoom);
+    }
+  }
+
+  // IO port labels
+  ctx.fillStyle = '#ff0';
+  ctx.font = `${Math.max(10 * vizState.zoom, 4)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  for (const t of lay.tiles) {
+    if (t.cell_name.startsWith('port_')) {
+      const [sx, sy] = toScreen(ox + t.x * stepX, oy + t.y * stepY, w, h);
+      ctx.fillText(t.cell_name, sx + (tileW * vizState.zoom) / 2, sy);
+    }
+  }
+
+}
+
+// --- Routing view ---
+
+function drawRoutingView(ctx, w, h) {
+  const net = vizState.netlist;
+  const lay = vizState.layout;
+  if (!net || !lay) {
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Need both netlist and layout. Run PnR first.', w/2, h/2);
+    return;
+  }
+  const tileW = 14, tileH = 14, gap = 2;
+  const stepX = tileW + gap, stepY = tileH + gap;
+  const ox = -(lay.cols * stepX) / 2, oy = -(lay.rows * stepY) / 2;
+
+  const tileCenter = (tx, ty) => [
+    ox + tx * stepX + stepX / 2,
+    oy + ty * stepY + stepY / 2,
+  ];
+
+  // Background grid
+  for (let row = 0; row < lay.rows; row++) {
+    for (let col = 0; col < lay.cols; col++) {
+      const [sx, sy] = toScreen(ox + col * stepX, oy + row * stepY, w, h);
+      ctx.fillStyle = 'rgba(30,30,40,0.4)';
+      ctx.fillRect(sx, sy, tileW * vizState.zoom, tileH * vizState.zoom);
+      ctx.strokeStyle = 'rgba(40,40,40,0.3)';
+      ctx.lineWidth = 0.3;
+      ctx.strokeRect(sx, sy, tileW * vizState.zoom, tileH * vizState.zoom);
+    }
+  }
+
+  // Wiring segments
+  const trackColors = [
+    'rgb(255,100,100)', 'rgb(100,200,255)', 'rgb(100,255,100)',
+    'rgb(255,255,100)', 'rgb(255,150,50)',  'rgb(200,100,255)',
+    'rgb(255,100,200)', 'rgb(100,255,200)',
+  ];
+  for (const seg of lay.wiring) {
+    const sc = tileCenter(seg.from_col, seg.from_row);
+    const ec = tileCenter(seg.to_col, seg.to_row);
+    const [fx, fy] = toScreen(sc[0], sc[1], w, h);
+    const [tx2, ty2] = toScreen(ec[0], ec[1], w, h);
+    ctx.strokeStyle = trackColors[seg.track % trackColors.length];
+    ctx.lineWidth = 2.5 * vizState.zoom;
+    ctx.beginPath();
+    ctx.moveTo(fx, fy);
+    ctx.lineTo(tx2, ty2);
+    ctx.stroke();
+  }
+
+  // Cell -> tile mapping
+  const cellTile = {};
+  for (const t of lay.tiles) cellTile[t.cell_name] = [t.x, t.y];
+
+  // Net -> cells
+  const netToCells = {};
+  for (const [name, cell] of Object.entries(net.cells)) {
+    for (const [_, bits] of Object.entries(cell.ports)) {
+      for (const b of bits) {
+        if (!netToCells[b]) netToCells[b] = [];
+        netToCells[b].push(name);
+      }
+    }
+  }
+  for (const [name, port] of Object.entries(net.ports)) {
+    for (const b of port.bits) {
+      if (!netToCells[b]) netToCells[b] = [];
+      netToCells[b].push('port_' + name);
+    }
+  }
+
+  // Logical connectivity overlay
+  const netColors = [
+    'rgba(137,180,250,0.25)', 'rgba(166,227,161,0.25)',
+    'rgba(249,226,175,0.25)', 'rgba(243,139,168,0.25)',
+    'rgba(203,166,247,0.25)',
+  ];
+  let ci = 0;
+  ctx.lineWidth = 0.8 * vizState.zoom;
+  for (const [_, cells] of Object.entries(netToCells)) {
+    if (cells.length < 2) continue;
+    const pts = [];
+    for (const cn of cells) {
+      const t = cellTile[cn];
+      if (t) pts.push(tileCenter(t[0], t[1]));
+    }
+    if (pts.length < 2) continue;
+    ctx.strokeStyle = netColors[ci % netColors.length];
+    ci++;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const [sx, sy] = toScreen(pts[i][0], pts[i][1], w, h);
+        const [ex, ey] = toScreen(pts[j][0], pts[j][1], w, h);
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Used tile highlights
+  for (const t of lay.tiles) {
+    const [cx, cy] = tileCenter(t.x, t.y);
+    const [sx, sy] = toScreen(cx, cy, w, h);
+    const tw = tileW * vizState.zoom * 0.8, th = tileH * vizState.zoom * 0.8;
+    ctx.fillStyle = 'rgba(60,120,60,0.3)';
+    ctx.strokeStyle = 'rgba(100,180,100,0.4)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.roundRect(sx - tw/2, sy - th/2, tw, th, 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+function renderViz() {
+  const canvas = document.getElementById('viz-canvas');
+  const wrap = document.getElementById('viz-wrap');
+  if (!canvas || !wrap) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = wrap.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = rect.height;
+
+  ctx.fillStyle = '#0d0d18';
+  ctx.fillRect(0, 0, w, h);
+
+  if (vizState.view === 'circuit') drawCircuitView(ctx, w, h);
+  else if (vizState.view === 'layout') drawLayoutView(ctx, w, h);
+  else if (vizState.view === 'routing') drawRoutingView(ctx, w, h);
+
+  // Update info
+  const net = vizState.netlist;
+  const lay = vizState.layout;
+  document.getElementById('viz-info-cells').textContent =
+    net ? `Cells: ${Object.keys(net.cells).length}` : '';
+  document.getElementById('viz-info-tiles').textContent =
+    lay ? `${lay.device} ${lay.cols}x${lay.rows} tiles: ${lay.tiles.length}/${lay.cols*lay.rows}` : '';
+  document.getElementById('viz-info-pos').textContent =
+    `Zoom: ${(vizState.zoom * 100).toFixed(0)}%`;
+}
+
+// --- Viz canvas setup ---
+
+function setupVizCanvas() {
+  const canvas = document.getElementById('viz-canvas');
+  const wrap = document.getElementById('viz-wrap');
+  if (!canvas || !wrap) return;
+
+  let isDragging = false, lastX = 0, lastY = 0;
+
+  canvas.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    vizState.panX += dx;
+    vizState.panY += dy;
+    renderViz();
+  });
+
+  window.addEventListener('mouseup', () => { isDragging = false; });
+
+  wrap.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.1 : 0.9;
+    vizState.zoom = Math.max(0.05, Math.min(10, vizState.zoom * factor));
+    renderViz();
+  }, { passive: false });
+
+  // Resize
+  const ro = new ResizeObserver(() => renderViz());
+  ro.observe(wrap);
+}
+
+// --- Viz view switching ---
+
+document.querySelectorAll('.viz-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.viz-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    vizState.view = btn.dataset.view;
+    renderViz();
+  });
+});
+
+document.getElementById('btn-viz-reset')?.addEventListener('click', () => {
+  vizState.panX = 0; vizState.panY = 0; vizState.zoom = 1;
+  renderViz();
+});
+
+// Init canvas when PnR tab is shown
+const pnrObserver = new MutationObserver(() => {
+  const panel = document.getElementById('panel-verilog-pnr');
+  if (panel && panel.style.display !== 'none') {
+    setTimeout(setupVizCanvas, 50);
+  }
+});
+const pnrPanel = document.getElementById('panel-verilog-pnr');
+if (pnrPanel) {
+  pnrObserver.observe(pnrPanel, { attributes: true, attributeFilter: ['style'] });
+}
+// Setup on load too
+setTimeout(setupVizCanvas, 500);
 
 // Tab switching
 document.querySelectorAll('.tab').forEach(tab => {
